@@ -1,0 +1,32 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <img src="../static/images/promotify.png" alt="">
+            </div>
+            <div class="admin-login"> <a href="/alogin">Admin Login</a> </div>
+        </header>
+        <h1>WELCOME!</h1>
+        <div class="login-boxes">
+            <div class="login-box">
+                <h2> <a href="/ilogin"> Influencer Login page</a></h2>
+            </div>
+            <div class="login-box">
+                <h2> <a href="/slogin"> Sponsors Login page</a></h2>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

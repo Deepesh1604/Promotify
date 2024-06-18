@@ -1,0 +1,141 @@
+/* General Styles */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #121212;
+    color: #ffffff;
+}
+
+a {
+    color: #1db954;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+input, button {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #1db954;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #1aa34a;
+}
+
+h1, h2 {
+    color: #1db954;
+}
+
+.header, .sidebar, .main-content, .stats-container {
+    margin: 0 auto;
+}
+
+.header, .sidebar {
+    background-color: #1f1f1f;
+    border-radius: 5px;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #333;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    position: fixed;
+    height: 100%;
+    padding-top: 20px;
+    box-sizing: border-box;
+}
+
+.logo {
+    width: 200px;
+    margin: 0 auto 30px auto;
+    display: flex;
+    justify-content: center;
+}
+
+.logo img {
+    width: 200px;
+    height: auto;
+}
+
+.sidebar nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar nav ul li {
+    padding: 5px 0;
+    text-align: center;
+}
+
+.sidebar nav ul li a {
+    text-decoration: none;
+    color: #ffffff;
+    padding: 10px 20px;
+    display: block;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.sidebar nav ul li a.active,.sidebar nav ul li a:hover{
+    background-color: #1db954;
+}
+.main-content {
+    margin-left: 270px; /* Adjusted for the sidebar width */
+    padding: 20px;
+    background-color: #1a1a1a;
+    border-radius: 5px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.user-info span {
+    margin-right: 20px;
+}
+
+.logout-btn {
+    background-color: #ff5252;
+}
+
+.logout-btn:hover {
+    background-color: #e64545;
+}
+
+.stats-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.chart {
+    width: 48%;
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: #2a2a2a;
+    border-radius: 5px;
+}
+
+.chart h2 {
+    margin-bottom: 20px;
+}

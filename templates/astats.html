@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Stats</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/astats.css') }}">
+</head>
+<body>
+    <div class="sidebar">
+        <header>
+            <div class="logo">
+                <img src="../static/images/promotify.png" alt="">
+            </div>
+        </header>
+        <nav>
+            <ul>
+                <li><a href="/adash">Dashboard</a></li>
+                <li><a href="/afind">Find</a></li>
+                <li><a href="#stats">Stats</a></li>
+                <li><a href="#logout">Logout</a></li>
+            </ul>
+        </nav>
+    </div>
+    <div class="main-content">
+        <header class="header">
+            <h1>Statistics</h1>
+            <div class="user-info">
+                <span>Welcome, Admin</span>
+                <button class="logout-btn">Logout</button>
+            </div>
+        </header>
+        <section id="stats">
+            <div class="stats-container">
+                <div class="chart">
+                    <h2>Campaign Progress</h2>
+                    <canvas id="campaignProgress"></canvas>
+                </div>
+                <div class="chart">
+                    <h2>Influencer Engagement</h2>
+                    <canvas id="influencerEngagement"></canvas>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script>
+        const ctx1 = document.getElementById('campaignProgress').getContext('2d');
+        const campaignProgress = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: ['Campaign 1', 'Campaign 2', 'Campaign 3'],
+                datasets: [{
+                    label: 'Progress (%)',
+                    data: [60, 70, 80],
+                    backgroundColor: '#1db954'
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#ffffff'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#ffffff'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#ffffff'
+                        }
+                    }
+                }
+            }
+        });
+
+        const ctx2 = document.getElementById('influencerEngagement').getContext('2d');
+        const influencerEngagement = new Chart(ctx2, {
+            type: 'pie',
+            data: {
+                labels: ['Instagram', 'Twitter', 'YouTube', 'LinkedIn'],
+                datasets: [{
+                    label: 'Engagement (%)',
+                    data: [30, 20, 25, 25],
+                    backgroundColor: ['#1db954', '#1a75ff', '#ff4d4d', '#ffa31a']
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#ffffff'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Influencer Sign Up Page</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ireg.css') }}">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify Logo">
+        </div>
+    </header>
+    <div class="container">
+        <h2>Influencer Sign Up</h2>
+        <form id="signupForm" action="{{ url_for('influ_reg') }}" method="POST">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Create Password" required>
+            <input type="text" name="instagram" placeholder="Instagram">
+            <input type="text" name="linkedin" placeholder="LinkedIn">
+            <input type="text" name="twitter" placeholder="Twitter">
+            <input type="text" name="youtube" placeholder="YouTube">
+            <button type="submit">Sign Up</button>
+        </form>
+    </div>
+</body>
+</html>

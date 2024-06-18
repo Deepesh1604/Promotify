@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Stats</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/istats.css') }}">
+    </head>
+    <body>
+        <div class="sidebar">
+            <header>
+                <div class="logo">
+                    <img src="../static/images/promotify.png" alt="">
+                </div>
+            </header>
+        <nav>
+            <ul>
+                <li><a href="/idash">Profile</a></li>
+                <li><a href="/ifind">Find</a></li>
+                <li><a href="#" class="active">Stats</a></li>
+                <li><a href="#">Logout</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <h1>Influencer's Dashboard</h1>
+            <div class="user-info">
+                <span>Welcome User_01</span>
+                <button class="logout-btn">Logout</button>
+            </div>
+        </header>
+
+        <div class="stats-section">
+            <h2>Statistics</h2>
+            <div class="charts-container">
+                <div class="chart">
+                    <canvas id="lineChart"></canvas>
+                </div>
+                <div class="chart">
+                    <canvas id="doughnutChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Line chart
+        const ctxLine = document.getElementById('lineChart').getContext('2d');
+        const lineChart = new Chart(ctxLine, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+                datasets: [{
+                    label: 'Earnings',
+                    data: [1200, 1900, 3000, 5000, 2000, 3000, 4500],
+                    borderColor: '#1db954',
+                    backgroundColor: 'rgba(29, 185, 84, 0.2)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Doughnut chart
+        const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
+        const doughnutChart = new Chart(ctxDoughnut, {
+            type: 'doughnut',
+            data: {
+                labels: ['Campaign 1', 'Campaign 2', 'Campaign 3', 'Campaign 4'],
+                datasets: [{
+                    data: [300, 50, 100, 150],
+                    backgroundColor: [
+                        '#1db954',
+                        '#ff5252',
+                        '#ffcd56',
+                        '#36a2eb'
+                    ],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    </script>
+</body>
+</html>

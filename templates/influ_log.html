@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Influencer Login Page</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ilogin.css') }}">
+</head>
+<body>
+    <div class="container">
+        <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify Logo">
+        <h2>Influencer Login</h2>
+        <form action="{{ url_for('influ_log') }}" method="POST">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Sign In</button>
+        </form>
+        <div class="signup-link">
+            <p>Don't have an account? <a href="{{ url_for('influ_reg') }}">Sign Up</a></p>
+        </div>
+    </div>
+</body>
+</html>
