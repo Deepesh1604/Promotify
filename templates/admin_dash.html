@@ -10,15 +10,15 @@
     <div class="sidebar">
         <header>
             <div class="logo">
-                <img src="../static/images/promotify.png" alt="">
+                <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="">
             </div>
         </header>
         <nav>
             <ul>
                 <li><a href="#" class="active">Dashboard</a></li>
-                <li><a href="/afind">Find</a></li>
-                <li><a href="/astats">Stats</a></li>
-                <li><a href="#">Logout</a></li>
+                <li><a href="{{ url_for('a_find') }}">Find</a></li>
+                <li><a href="{{ url_for('a_stats') }}">Stats</a></li>
+                <li><a href="{{ url_for('admin_logout') }}">Logout</a></li>
             </ul>
         </nav>
     </div>
@@ -27,9 +27,18 @@
             <h1>Admin Dashboard</h1>
             <div class="user-info">
                 <span>Welcome, Admin</span>
-                <button class="logout-btn">Logout</button>
+                <a href="{{ url_for('admin_logout') }}" class="logout-btn">Logout</a>
             </div>
         </header>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
         <section class="content">
             <div class="section">
                 <h2>Ongoing Campaigns</h2>

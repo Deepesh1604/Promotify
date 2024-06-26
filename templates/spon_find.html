@@ -10,16 +10,16 @@
     <div class="sidebar">
         <header>
             <div class="logo">
-                <img src="../static/images/promotify.png" alt="">
+                <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify Logo">
             </div>
         </header>
         <nav>
             <ul>
-                <li><a href="/sdash" >Profile</a></li>
-                <li><a href="/scamp">Campaigns</a></li>
-                <li><a href="#" class="active">Find</a></li>
-                <li><a href="/sstats">Stats</a></li>
-                <li><a href="#">Logout</a></li>
+                <li><a href="{{ url_for('spon_dash') }}">Profile</a></li>
+                <li><a href="{{ url_for('spon_camp') }}">Campaigns</a></li>
+                <li><a href="{{ url_for('sfind') }}" class="active">Find</a></li>
+                <li><a href="{{ url_for('spon_stats') }}">Stats</a></li>
+                <li><a href="{{ url_for('spon_logout') }}">Logout</a></li>
             </ul>
         </nav>
     </div>
@@ -27,8 +27,8 @@
         <header>
             <h1>Sponsor Dashboard - Find</h1>
             <div class="user-info">
-                <span>Welcome, Sponsor_01</span>
-                <button class="logout-btn">Logout</button>
+                <span>Welcome, Sponsor</span>
+                <a href="{{ url_for('spon_logout') }}" class="logout-btn">Logout</a>
             </div>
         </header>
         <div class="search-container">
@@ -36,24 +36,29 @@
             <button>Filter</button>
         </div>
         <div class="results">
+            <h2>Available Influencers</h2>
+            {% for influencer in influencers %}
             <div class="result-item">
-                <span>Campaign Name 1 Details</span>
-                <button class="view-btn">View</button>
-            </div>
-            <div class="result-item">
-                <span>Campaign Name 1 Details</span>
-                <button class="view-btn">View</button>
-            </div>
-            <div class="result-item">
-                <span>Influencer 01 Details</span>
+                <span>{{ influencer.username }} - {{ influencer.email }}</span>
                 <button class="view-btn">View</button>
                 <button class="request-btn">Request</button>
             </div>
+            {% endfor %}
+
+            <h2>Active Campaigns</h2>
+            {% for campaign in campaigns %}
             <div class="result-item">
-                <span>Influencer 01 Details</span>
-                <button class="view-btn">View</button>
-                <button class="request-btn">Request</button>
+                <span>
+                    {{ campaign.name }} by {{ campaign.sponsor.username }}
+                    <br>Start: {{ campaign.start_date }} | End: {{ campaign.end_date }}
+                    <br>Budget: ${{ campaign.budget }}
+                    <br>{{ campaign.description }}
+                </span>
+                <!-- <form action="{{ url_for('apply_campaign', campaign_id=campaign.id) }}" method="POST" style="display: inline;">
+                    <button class="view-btn" type="submit">Apply</button>
+                </form> -->
             </div>
+            {% endfor %}
         </div>
     </div>
 </body>

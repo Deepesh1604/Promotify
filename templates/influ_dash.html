@@ -10,60 +10,72 @@
     <div class="sidebar">
         <header>
             <div class="logo">
-                <img src="../static/images/promotify.png" alt="">
+                <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify Logo">
             </div>
         </header>
         <nav>
             <ul>
                 <li><a href="#" class="active">Profile</a></li>
-                <li><a href="/ifind">Find</a></li>
-                <li><a href="/istats">Stats</a></li>
-                <li><a href="#">Logout</a></li>
+                <li><a href="{{ url_for('influ_find') }}">Find</a></li>
+                <li><a href="{{ url_for('influ_stats') }}">Stats</a></li>
             </ul>
         </nav>
     </div>
-
     <div class="main-content">
         <header>
             <h1>Influencer's Dashboard</h1>
             <div class="user-info">
-                <span>Welcome User_01</span>
-                <button class="logout-btn">Logout</button>
+                <span>Welcome {{ influencer.username if influencer else 'Influencer' }}</span>
+                <a href="{{ url_for('influ_logout') }}" class="logout-btn">Logout</a>
             </div>
         </header>
-
         <div class="profile-section">
             <div class="profile-pic"></div>
             <div class="profile-info">
-                <p>Rating: 5</p>
-                <p>Earnings this month: $500</p>
+                <p>Rating: {{ influencer.rating if influencer and influencer.rating else 'N/A' }}</p>
+                <p>Earnings this month: ${{ influencer.earnings if influencer and influencer.earnings else '0' }}</p>
             </div>
         </div>
-
         <div class="campaigns-section">
-            <h2>Active Campaigns</h2>
-            <div class="campaign">
-                <span>Campaign 01 | Progress 10%</span>
-                <button class="view-btn">View</button>
-            </div>
-            <div class="campaign">
-                <span>Campaign 02 | Progress 40%</span>
-                <button class="view-btn">View</button>
-            </div>
+            <h2>Available Campaigns</h2>
+            {% if active_campaigns %}
+                {% for campaign in active_campaigns %}
+                <div class="campaign">
+                    <span>{{ campaign.name }} | Sponsor: {{ campaign.sponsor.username }}</span>
+                    <a href="{{ url_for('influ_dash', campaign_id=campaign.id) }}" class="view-btn">View Details</a>
+                    <form action="{{ url_for('apply_campaign', campaign_id=campaign.id) }}" method="post" style="display: inline;">
+                        <button type="submit" class="apply-btn">Apply</button>
+                    </form>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No available campaigns at the moment.</p>
+            {% endif %}
         </div>
-
+        {% if selected_campaign %}
+        <div class="campaign-details">
+            <h2>Campaign Details</h2>
+            <h3>{{ selected_campaign.name }}</h3>
+            <p>Sponsor: {{ selected_campaign.sponsor.username }}</p>
+            <p>Description: {{ selected_campaign.description or 'No description available.' }}</p>
+            <!-- Add more details as needed -->
+            <form action="{{ url_for('apply_campaign', campaign_id=selected_campaign.id) }}" method="post">
+                <button type="submit" class="apply-btn">Apply for this Campaign</button>
+            </form>
+        </div>
+        {% endif %}
         <div class="requests-section">
-            <h2>New Requests</h2>
-            <div class="campaign">
-                <span>Campaign 03 | Company 01</span>
-                <button class="view-btn">View</button>
-                <button class="reject-btn">Reject</button>
-            </div>
-            <div class="campaign">
-                <span>Campaign 04 | Company 01</span>
-                <button class="view-btn">View</button>
-                <button class="reject-btn">Reject</button>
-            </div>
+            <h2>Your Active Campaigns</h2>
+            {% if influencer.campaigns %}
+                {% for campaign in influencer.campaigns %}
+                <div class="campaign">
+                    <span>{{ campaign.name }} | Sponsor: {{ campaign.sponsor.username }}</span>
+                    <a href="{{ url_for('influ_dash', campaign_id=campaign.id) }}" class="view-btn">View Details</a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>You're not part of any active campaigns at the moment.</p>
+            {% endif %}
         </div>
     </div>
 </body>

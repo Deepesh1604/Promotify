@@ -14,6 +14,13 @@
     </header>
     <div class="container">
         <h2>Influencer Sign Up</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
         <form id="signupForm" action="{{ url_for('influ_reg') }}" method="POST">
             <input type="text" name="username" placeholder="Username" required>
             <input type="email" name="email" placeholder="Email" required>
@@ -24,6 +31,7 @@
             <input type="text" name="youtube" placeholder="YouTube">
             <button type="submit">Sign Up</button>
         </form>
+        <p>Already have an account? <a href="{{ url_for('influ_log') }}">Log in</a></p>
     </div>
 </body>
 </html>

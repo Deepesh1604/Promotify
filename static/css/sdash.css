@@ -52,7 +52,7 @@ body {
 .sidebar nav ul li a {
     text-decoration: none;
     color: #ffffff;
-    padding: 10px 90px;
+    padding: 10px 85px;
     display: block;
     border-radius: 5px;
     transition: background-color 0.3s;
@@ -78,7 +78,7 @@ header {
     align-items: center;
     border-bottom: 1px solid #444;
     padding-bottom: 10px;
-    margin-bottom: 0px;
+    margin-bottom: 20px;
 }
 
 header h1 {

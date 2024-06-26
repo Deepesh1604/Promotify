@@ -1,109 +1,49 @@
-
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Sponsor Campaigns</title>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/scamp.css') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Campaign</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/scamp.css') }}">
 </head>
 <body>
-    <div class="sidebar">
-        <header>
-            <div class="logo">
-                <img src="../static/images/promotify.png" alt="">
-            </div>
-        </header>
-        <nav>
-            <ul>
-                <li><a href="/sdash">Profile</a></li>
-                <li><a href="#" class="active">Campaigns</a></li>
-                <li><a href="/sfind">Find</a></li>
-                <li><a href="/sstats">Stats</a></li>
-                <li><a href="#">Logout</a></li>
-            </ul>
-        </nav>
-    </div>
-    <div class="main-content">
-        <header>
-            <h1>Campaigns</h1>
-            <div class="user-info">
-                <span>Welcome, Sponsor 01</span>
-                <button class="logout-btn">Logout</button>
-            </div>
-        </header>
-        <div class="content">
-            <button class="add-campaign-btn">+</button>
-            
-            <div class="add-campaign-form">
-                <h2>Add Campaign</h2>
-                <form>
-                    <div class="form-group">
-                        <label for="campaignName">Campaign Name:</label>
-                        <input type="text" id="campaignName" name="campaignName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="campaignDescription">Description:</label>
-                        <textarea id="campaignDescription" name="campaignDescription" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="campaignImage">Image URL:</label>
-                        <input type="text" id="campaignImage" name="campaignImage">
-                    </div>
-                    <div class="form-group">
-                        <label for="campaignCategory">Category:</label>
-                        <input type="text" id="campaignCategory" name="campaignCategory" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="campaignDate">Date Till Promote:</label>
-                        <input type="date" id="campaignDate" name="campaignDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="campaignNiche">Niche:</label>
-                        <input type="text" id="campaignNiche" name="campaignNiche" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="campaignBudget">Budget:</label>
-                        <input type="number" id="campaignBudget" name="campaignBudget" required>
-                    </div>
-                    <div class="form-buttons">
-                        <button type="submit" class="add-btn">Add</button>
-                        <button type="button" class="cancel-btn">Cancel</button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="campaign-list">
-                <h2>Active Campaigns</h2>
-                <div class="search-filter">
-                    <input type="text" placeholder="Search campaigns...">
-                    <button class="filter-btn">Filter</button>
-                </div>
-                <ul>
-                    <li>
-                        <span>Campaign Name 1 | Details</span>
-                        <button class="view-btn">View</button>
-                        <button class="request-btn">Request</button>
-                    </li>
-                    <li>
-                        <span>Campaign Name 2 | Details</span>
-                        <button class="view-btn">View</button>
-                        <button class="request-btn">Request</button>
-                    </li>
+    <div class="container">
+        <h1>Create New Campaign</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
                 </ul>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('spon_camp') }}">
+            <div class="form-group">
+                <label for="name">Campaign Name:</label>
+                <input type="text" id="name" name="name" required>
             </div>
-            
-            <div class="chat-box">
-                <h2>Chat</h2>
-                <div class="chat-messages">
-                    <div class="message">Hello, let's discuss the campaign details.</div>
-                    <div class="message">Sure, I am interested.</div>
-                </div>
-                <input type="text" placeholder="Type a message..." class="chat-input">
-                <button class="send-btn">Send</button>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" rows="4"></textarea>
             </div>
-        </div>
+            <div class="form-group">
+                <label for="start_date">Start Date:</label>
+                <input type="date" id="start_date" name="start_date" required>
+            </div>
+            <div class="form-group">
+                <label for="end_date">End Date:</label>
+                <input type="date" id="end_date" name="end_date" required>
+            </div>
+            <div class="form-group">
+                <label for="budget">Budget (in USD):</label>
+                <input type="number" id="budget" name="budget" min="0" step="0.01" required>
+            </div>
+            <button type="submit" class="btn">Create Campaign</button>
+        </form>
+        <a href="{{ url_for('spon_dash') }}" class="btn btn-secondary">Back to Dashboard</a>
     </div>
 </body>
 </html>
-
