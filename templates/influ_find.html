@@ -31,32 +31,68 @@
             </div>
         </header>
         <div class="search-container">
-            <input type="text" placeholder="Search...">
-            <button>Filter</button>
+            <form method="get" action="{{ url_for('ifind') }}">
+                <input type="text" name="search" placeholder="Search..." value="{{ search_query }}">
+                <button type="submit">Search</button>
+            </form>
         </div>
         <div class="results">
-            <h2>Available Sponsors</h2>
-            {% for sponsor in sponsors %}
-            <div class="result-item">
-                <span>{{ sponsor.username }} - {{ sponsor.industry }}</span>
-                <button class="view-btn">View</button>
-            </div>
-            {% endfor %}
+            {% if search_query %}
+                <h2>Search Results for "{{ search_query }}"</h2>
+                <h3>Sponsors</h3>
+                {% if searched_sponsor %}
+                    {% for sponsor in searched_sponsor %}
+                    <div class="result-item">
+                        <span>{{ sponsor.username }} - {{ sponsor.industry }}</span>
+                        <button class="view-btn">View</button>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No sponsors found.</p>
+                {% endif %}
 
-            <h2>Active Campaigns</h2>
-            {% for campaign in campaigns %}
-            <div class="result-item">
-                <span>
-                    {{ campaign.name }} by {{ campaign.sponsor.username }}
-                    <br>Start: {{ campaign.start_date }} | End: {{ campaign.end_date }}
-                    <br>Budget: ${{ campaign.budget }}
-                    <br>{{ campaign.description }}
-                </span>
-                <form action="{{ url_for('apply_campaign', campaign_id=campaign.id) }}" method="POST" style="display: inline;">
-                    <button class="view-btn" type="submit">Apply</button>
-                </form>
-            </div>
-            {% endfor %}
+                <h3>Campaigns</h3>
+                {% if searched_campaigns %}
+                    {% for campaign in searched_campaigns %}
+                    <div class="result-item">
+                        <span>
+                            {{ campaign.name }} by {{ campaign.sponsor.username }}
+                            <br>Start: {{ campaign.start_date }} | End: {{ campaign.end_date }}
+                            <br>Budget: ${{ campaign.budget }}
+                            <br>{{ campaign.description }}
+                        </span>
+                        <form action="{{ url_for('apply_campaign', campaign_id=campaign.id) }}" method="POST" style="display: inline;">
+                            <button class="view-btn" type="submit">Apply</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No campaigns found.</p>
+                {% endif %}
+            {% else %}
+                <h2>Available Sponsors</h2>
+                {% for sponsor in sponsors %}
+                <div class="result-item">
+                    <span>{{ sponsor.username }} - {{ sponsor.industry }}</span>
+                    <button class="view-btn">View</button>
+                </div>
+                {% endfor %}
+
+                <h2>Active Campaigns</h2>
+                {% for campaign in campaigns %}
+                <div class="result-item">
+                    <span>
+                        {{ campaign.name }} by {{ campaign.sponsor.username }}
+                        <br>Start: {{ campaign.start_date }} | End: {{ campaign.end_date }}
+                        <br>Budget: ${{ campaign.budget }}
+                        <br>{{ campaign.description }}
+                    </span>
+                    <form action="{{ url_for('apply_campaign', campaign_id=campaign.id) }}" method="POST" style="display: inline;">
+                        <button class="view-btn" type="submit">Apply</button>
+                    </form>
+                </div>
+                {% endfor %}
+            {% endif %}
         </div>
     </div>
 </body>

@@ -11,14 +11,14 @@
     <div class="sidebar">
         <header>
             <div class="logo">
-                <img src="../static/images/promotify.png" alt="">
+                <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="">
             </div>
         </header>
         <nav>
             <ul>
                 <li><a href="/sdash">Profile</a></li>
-                <li><a href="#">Campaign</a></li>
-                <li><a href="#">Find</a></li>
+                <li><a href="/spon_camp">Campaign</a></li>
+                <li><a href="/sfind">Find</a></li>
                 <li><a href="#" class="active">Stats</a></li>
                 <li><a href="#">Logout</a></li>
             </ul>
@@ -39,135 +39,33 @@
             <div class="stats-cards">
                 <div class="card">
                     <h3>Total Campaigns</h3>
-                    <p>20</p>
+                    <p>{{ stats.total_campaigns }}</p>
                 </div>
                 <div class="card">
                     <h3>Active Campaigns</h3>
-                    <p>10</p>
+                    <p>{{ stats.active_campaigns }}</p>
                 </div>
                 <div class="card">
                     <h3>Completed Campaigns</h3>
-                    <p>7</p>
+                    <p>{{ stats.completed_campaigns }}</p>
                 </div>
                 <div class="card">
                     <h3>Total Budget</h3>
-                    <p>$50,000</p>
+                    <p>${{ stats.total_budget }}</p>
                 </div>
             </div>
 
-            <div class="charts">
+            <!-- <div class="charts">
                 <div class="chart">
                     <h3>Campaign Performance</h3>
-                    <img src="performance-chart.png" alt="Performance Chart">
+                    <img src="{{ url_for('static', filename='images/performance-chart.png') }}" alt="Performance Chart">
                 </div>
                 <div class="chart">
                     <h3>Budget Allocation</h3>
-                    <img src="budget-chart.png" alt="Budget Chart">
+                    <img src="{{ url_for('static', filename='images/budget-chart.png') }}" alt="Budget Chart">
                 </div>
-            </div>
-
-            <div class="additional-charts">
-                <div class="chart">
-                    <h3>Engagement Rate</h3>
-                    <canvas id="engagementRateChart"></canvas>
-                </div>
-                <div class="chart">
-                    <h3>Reach and Impressions</h3>
-                    <canvas id="reachImpressionsChart"></canvas>
-                </div>
-                <div class="chart">
-                    <h3>Conversion Rate</h3>
-                    <canvas id="conversionRateChart"></canvas>
-                </div>
-            </div>
+            </div> -->
         </div>
     </div>
-
-    <script>
-        // Engagement Rate Chart
-        const ctx1 = document.getElementById('engagementRateChart').getContext('2d');
-        const engagementRateChart = new Chart(ctx1, {
-            type: 'line',
-            data: {
-                labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-                datasets: [{
-                    label: 'Engagement Rate',
-                    data: [65, 59, 80, 81, 56, 55],
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        // Reach and Impressions Chart
-        const ctx2 = document.getElementById('reachImpressionsChart').getContext('2d');
-        const reachImpressionsChart = new Chart(ctx2, {
-            type: 'bar',
-            data: {
-                labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-                datasets: [
-                    {
-                        label: 'Reach',
-                        data: [200, 190, 210, 180, 240, 220],
-                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
-                        borderColor: 'rgba(153, 102, 255, 1)',
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Impressions',
-                        data: [300, 280, 290, 250, 310, 300],
-                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
-                        borderColor: 'rgba(255, 159, 64, 1)',
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        // Conversion Rate Chart
-        const ctx3 = document.getElementById('conversionRateChart').getContext('2d');
-        const conversionRateChart = new Chart(ctx3, {
-            type: 'doughnut',
-            data: {
-                labels: ['Direct', 'Referral', 'Social', 'Other'],
-                datasets: [{
-                    label: 'Conversion Rate',
-                    data: [300, 50, 100, 80],
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)',
-                        'rgba(75, 192, 192, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
-    </script>
 </body>
 </html>

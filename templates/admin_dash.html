@@ -16,8 +16,8 @@
         <nav>
             <ul>
                 <li><a href="#" class="active">Dashboard</a></li>
-                <li><a href="{{ url_for('a_find') }}">Find</a></li>
-                <li><a href="{{ url_for('a_stats') }}">Stats</a></li>
+                <li><a href="{{ url_for('afind') }}">Find</a></li>
+                <li><a href="{{ url_for('astats') }}">Stats</a></li>
                 <li><a href="{{ url_for('admin_logout') }}">Logout</a></li>
             </ul>
         </nav>
@@ -39,32 +39,56 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
+        <div class="search-container">
+            <form action="{{ url_for('admin_dash') }}" method="GET">
+                <input type="text" name="search" placeholder="Search campaigns or sponsors..." value="{{ search_query }}">
+                <button type="submit">Search</button>
+            </form>
+        </div>
         <section class="content">
-            <div class="section">
-                <h2>Ongoing Campaigns</h2>
-                <div class="campaign">
-                    <span>Campaign 01 | Progress 10%</span>
-                    <button class="view-btn">View</button>
+            <h2>All Campaigns</h2>
+            {% for campaign in campaigns %}
+                <div class="result-item">
+                    <span>
+                        <strong>{{ campaign.name }}</strong> by {{ campaign.sponsor.username }}
+                        <br>Start: {{ campaign.start_date.strftime('%Y-%m-%d') }} | End: {{ campaign.end_date.strftime('%Y-%m-%d') }}
+                        <br>Budget: ${{ campaign.budget }}
+                        <br>{{ campaign.description }}
+                        <br>Status: {{ campaign.status }} | Progress: {{ campaign.progress }}%
+                    </span>
+                    <button class="view-btn" onclick="toggleDetails('campaign-{{ campaign.id }}')">Toggle Details</button>
+                    <form action="{{ url_for('delete_campaign', campaign_id=campaign.id) }}" method="POST" style="display: inline;">
+                        <button type="submit" class="remove-btn" onclick="return confirm('Are you sure you want to delete this campaign?')">Delete</button>
+                    </form>
+                    <div id="campaign-{{ campaign.id }}" class="campaign-details" style="display: none;">
+                        <h3>Accepted Influencers:</h3>
+                        <ul>
+                            {% for influencer in campaign.accepted_influencers %}
+                                <li>
+                                    {{ influencer.username }} ({{ influencer.email }})
+                                    <br>Instagram: {{ influencer.instagram or 'N/A' }}
+                                    <br>Twitter: {{ influencer.twitter or 'N/A' }}
+                                    <br>YouTube: {{ influencer.youtube or 'N/A' }}
+                                    <br>LinkedIn: {{ influencer.linkedin or 'N/A' }}
+                                </li>
+                            {% else %}
+                                <li>No influencers have accepted this campaign yet.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
-                <div class="campaign">
-                    <span>Campaign 02 | Progress 40%</span>
-                    <button class="view-btn">View</button>
-                </div>
-            </div>
-            <div class="section">
-                <h2>Flagged Users/Campaigns</h2>
-                <div class="campaign">
-                    <span>Campaign 04 | Company 01</span>
-                    <button class="view-btn">View</button>
-                    <button class="remove-btn">Remove</button>
-                </div>
-                <div class="campaign">
-                    <span>Campaign 05 | Company 01</span>
-                    <button class="view-btn">View</button>
-                    <button class="remove-btn">Remove</button>
-                </div>
-            </div>
+            {% endfor %}
         </section>
     </div>
+    <script>
+        function toggleDetails(id) {
+            var details = document.getElementById(id);
+            if (details.style.display === "none") {
+                details.style.display = "block";
+            } else {
+                details.style.display = "none";
+            }
+        }
+    </script>
 </body>
 </html>

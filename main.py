@@ -2,6 +2,8 @@ from flask import Flask, render_template, redirect, url_for, request, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import sqlalchemy
+from sqlalchemy import func
+from sqlalchemy import or_
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
@@ -9,11 +11,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'your_secret_key'  # Replace with your own secret key
 db = SQLAlchemy(app)
 
-
-class Admin(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=False)
+ADMIN_EMAIL = 'admin@gmail.com'
+ADMIN_PASSWORD = 'admin123'
 
 class Influencer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -43,6 +42,7 @@ class Campaign(db.Model):
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
     budget = db.Column(db.Float, nullable=False)
+    status = db.Column(db.String(50))
     sponsor = db.relationship('Sponsor', backref=db.backref('campaigns', lazy=True))
     influencers = db.relationship('Influencer', secondary='application', 
                                   primaryjoin="and_(Campaign.id==Application.campaign_id, Application.status=='accepted')",
@@ -88,7 +88,7 @@ def spon_logout():
     session.pop('sponsor_logged_in', None)
     session.pop('sponsor_id', None)
     flash('You have been logged out.', 'success')
-    return redirect(url_for('spon_log'))
+    return redirect(url_for('index'))
 
 @app.route('/sreg', methods=['GET', 'POST'])
 def spon_reg():
@@ -172,15 +172,76 @@ def influ_dash(campaign_id=None):
 @app.route('/ilogout')
 def influ_logout():
     session.pop('influencer_id', None)
-    return redirect(url_for('influ_log'))
+    return redirect(url_for('index'))
 
 @app.route('/adash')
 def admin_dash():
-    if 'admin_logged_in' in session and session['admin_logged_in']:
-        return render_template('admin_dash.html')
-    else:
+    if 'admin_logged_in' not in session or not session['admin_logged_in']:
         flash('You need to log in first.', 'error')
         return redirect(url_for('admin_log'))
+
+    search_query = request.args.get('search', '')
+
+    # Query all campaigns
+    campaigns_query = Campaign.query
+
+    if search_query:
+        search_filter = or_(
+            Campaign.name.ilike(f'%{search_query}%'),
+            Campaign.sponsor.has(Sponsor.username.ilike(f'%{search_query}%'))
+        )
+        campaigns_query = campaigns_query.filter(search_filter)
+
+    campaigns = campaigns_query.order_by(Campaign.start_date.desc()).all()
+
+    for campaign in campaigns:
+        if campaign.start_date <= datetime.utcnow().date() <= campaign.end_date:
+            campaign.status = "Ongoing"
+        elif campaign.start_date > datetime.utcnow().date():
+            campaign.status = "Upcoming"
+        else:
+            campaign.status = "Completed"
+
+        total_days = (campaign.end_date - campaign.start_date).days
+        days_passed = (datetime.utcnow().date() - campaign.start_date).days
+        campaign.progress = min(max(int((days_passed / total_days) * 100), 0), 100)
+
+    return render_template('admin_dash.html', 
+                           campaigns=campaigns,
+                           search_query=search_query)
+
+# @app.route('/delete_campaign/<int:campaign_id>', methods=['POST'])
+# def delete_campaign(campaign_id):
+#     if 'admin_logged_in' not in session or not session['admin_logged_in']:
+#         flash('You need to log in first.', 'error')
+#         return redirect(url_for('admin_log'))
+
+#     campaign = Campaign.query.get_or_404(campaign_id)
+#     db.session.delete(campaign)
+#     db.session.commit()
+#     flash(f'Campaign "{campaign.name}" has been deleted.', 'success')
+#     return redirect(url_for('admin_dash'))
+
+@app.route('/view_campaign/<int:campaign_id>')
+def view_campaign(campaign_id):
+    if 'admin_logged_in' not in session or not session['admin_logged_in']:
+        flash('You need to log in first.', 'error')
+        return redirect(url_for('admin_log'))
+
+    campaign = Campaign.query.get_or_404(campaign_id)
+    return render_template('view_campaign.html', campaign=campaign)
+
+@app.route('/remove_campaign/<int:campaign_id>', methods=['POST'])
+def remove_campaign(campaign_id):
+    if 'admin_logged_in' not in session or not session['admin_logged_in']:
+        flash('You need to log in first.', 'error')
+        return redirect(url_for('admin_log'))
+
+    campaign = Campaign.query.get_or_404(campaign_id)
+    db.session.delete(campaign)
+    db.session.commit()
+    flash(f'Campaign "{campaign.name}" has been removed.', 'success')
+    return redirect(url_for('admin_dash'))
 
 @app.route('/alogin', methods=['GET', 'POST'])
 def admin_log():
@@ -188,8 +249,9 @@ def admin_log():
         email = request.form['email']
         password = request.form['password']
         
-        if email == 'admin@gmail.com' and password == 'admin123':
+        if email == ADMIN_EMAIL and password == ADMIN_PASSWORD:
             session['admin_logged_in'] = True
+            flash('Logged in successfully', 'success')
             return redirect(url_for('admin_dash'))
         else:
             flash('Invalid credentials', 'error')
@@ -197,43 +259,90 @@ def admin_log():
 
     return render_template('admin_log.html')
 
+
 @app.route('/alogout')
 def admin_logout():
     session.pop('admin_logged_in', None)
     flash('You have been logged out.', 'success')
-    return redirect(url_for('admin_log'))
+    return redirect(url_for('index'))
 
 @app.route('/afind')
-def a_find():
-    if 'admin_logged_in' in session and session['admin_logged_in']:
-        return render_template('afind.html')
-    else:
+def afind():
+    search_query = request.args.get('search', '')
+    filter_options = request.args.getlist('filter')
+    
+    sponsors = []
+    influencers = []
+    campaigns = []
+
+    if 'sponsors' in filter_options or not filter_options:
+        sponsors = Sponsor.query.filter(Sponsor.username.contains(search_query)).all()
+
+    if 'influencers' in filter_options or not filter_options:
+        influencers = Influencer.query.filter(Influencer.username.contains(search_query)).all()
+
+    if 'campaigns' in filter_options or not filter_options:
+        campaigns = Campaign.query.filter(Campaign.name.contains(search_query)).all()
+    
+    return render_template('afind.html', 
+                           sponsors=sponsors, 
+                           influencers=influencers, 
+                           campaigns=campaigns, 
+                           search_query=search_query, 
+                           filter_options=filter_options)
+
+
+@app.route('/remove_sponsor/<int:sponsor_id>', methods=['POST'])
+def remove_sponsor(sponsor_id):
+    if 'admin_logged_in' not in session or not session['admin_logged_in']:
         flash('You need to log in first.', 'error')
         return redirect(url_for('admin_log'))
 
+    sponsor = Sponsor.query.get_or_404(sponsor_id)
+    db.session.delete(sponsor)
+    db.session.commit()
+    flash(f'Sponsor "{sponsor.username}" has been removed.', 'success')
+    return redirect(url_for('afind'))
+
+@app.route('/remove_influencer/<int:influencer_id>', methods=['POST'])
+def remove_influencer(influencer_id):
+    if 'admin_logged_in' not in session or not session['admin_logged_in']:
+        flash('You need to log in first.', 'error')
+        return redirect(url_for('admin_log'))
+
+    influencer = Influencer.query.get_or_404(influencer_id)
+    db.session.delete(influencer)
+    db.session.commit()
+    flash(f'Influencer "{influencer.username}" has been removed.', 'success')
+    return redirect(url_for('afind'))
+
 @app.route('/astats')
-def a_stats():
+def astats():
     if 'admin_logged_in' in session and session['admin_logged_in']:
         return render_template('astats.html')
     else:
         flash('You need to log in first.', 'error')
         return redirect(url_for('admin_log'))
-
-@app.route('/ifind')
-def influ_find():
-    return render_template('influ_find.html')
-
+    
 @app.route('/istats')
 def influ_stats():
     return render_template('influ_stats.html')
 
 @app.route('/sstats')
-def spon_stats():
-    if 'sponsor_logged_in' in session and session['sponsor_logged_in']:
-        return render_template('spon_stats.html')
-    else:
-        flash('You need to log in first.', 'error')
-        return redirect(url_for('spon_log'))
+def sstats():
+    total_campaigns = Campaign.query.count()
+    active_campaigns = Campaign.query.filter_by(status='active').count()
+    completed_campaigns = Campaign.query.filter_by(status='completed').count()
+    total_budget = db.session.query(db.func.sum(Campaign.budget)).scalar()
+
+    stats = {
+        'total_campaigns': total_campaigns,
+        'active_campaigns': active_campaigns,
+        'completed_campaigns': completed_campaigns,
+        'total_budget': total_budget
+    }
+
+    return render_template('spon_stats.html', stats=stats)
 
 @app.route('/sdash')
 @app.route('/sdash/<int:campaign_id>')
@@ -390,21 +499,51 @@ def apply_campaign(campaign_id):
 
     return redirect(url_for('ifind'))
 
+@app.route('/influencer/<username>')
+def influencer_profile(username):
+    influencer = Influencer.query.filter_by(username=username).first_or_404()
+    return render_template('influ_profile.html', influencer=influencer)
+
 @app.route('/sfind')
 def sfind():
-    influencer = Influencer.query.all()
+    search_query = request.args.get('search', '')
+    searched_influencer = None
+
+    if search_query:
+        searched_influencer = Influencer.query.filter_by(username=search_query).first()
+
+    influencers = Influencer.query.all()
     campaigns = Campaign.query.filter(Campaign.end_date >= datetime.now().date()).all()
     
-    return render_template('spon_find.html', inflencers=influencer, campaigns=campaigns)
+    return render_template('spon_find.html', 
+                           influencers=influencers, 
+                           campaigns=campaigns, 
+                           search_query=search_query,
+                           searched_influencer=searched_influencer)
 
 @app.route('/ifind')
 def ifind():
+    search_query = request.args.get('search', '')
+    searched_sponsor = None
+    searched_campaigns = None
+
+    if search_query:
+        searched_sponsor = Sponsor.query.filter_by(username=search_query).all()
+        searched_campaigns = Campaign.query.filter(
+            (Campaign.name.contains(search_query)) | 
+            (Campaign.sponsor.has(Sponsor.username.contains(search_query)))
+        ).all()
+
     sponsors = Sponsor.query.all()
-    influencer = Influencer.query.all()
     campaigns = Campaign.query.filter(Campaign.end_date >= datetime.now().date()).all()
-    
-    return render_template('influ_find.html', sponsors=sponsors, campaigns=campaigns, influencer=influencer)
+
+    return render_template('influ_find.html', 
+                           sponsors=sponsors, 
+                           campaigns=campaigns, 
+                           search_query=search_query,
+                           searched_sponsor=searched_sponsor,
+                           searched_campaigns=searched_campaigns)
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True , port = 5000)

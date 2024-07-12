@@ -3,60 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find</title>
+    <title>Admin Find</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/afind.css') }}">
 </head>
 <body>
     <div class="sidebar">
-        <header class="'header">
+        <header class="header">
             <div class="logo">
-                <img src="../static/images/promotify.png" alt="">
+                <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify Logo">
             </div>
         </header>
         <nav class="nav">
             <ul>
-                <li><a href="/adash">Dashboard</a></li>
-                <li><a href="#"class="active">Find</a></li>
-                <li><a href="/astats">Stats</a></li>
-                <li><a href="#logout">Logout</a></li>
+                <li><a href="{{ url_for('admin_dash') }}">Dashboard</a></li>
+                <li><a href="#" class="active">Find</a></li>
+                <li><a href="{{ url_for('astats') }}">Stats</a></li>
+                <li><a href="{{ url_for('admin_logout') }}">Logout</a></li>
             </ul>
         </nav>
     </div>
     <div class="main-content">
         <header>
-            <h1>Find Users</h1>
+            <h1>Find Users and Campaigns</h1>
             <div class="user-info">
                 <span>Welcome, Admin</span>
-                <button class="logout-btn">Logout</button>
+                <a href="{{ url_for('admin_logout') }}" class="logout-btn">Logout</a>
             </div>
         </header>
         <section id="find">
             <div class="search-container">
-                <input type="text" placeholder="Search...">
-                <button>Search</button>
-                <button>Filter</button>
+                <form method="GET" action="{{ url_for('afind') }}">
+                    <input type="text" id="search-input" name="search" placeholder="Search..." value="{{ search_query }}">
+                    <button type="submit">Search</button>
+                    <button type="button" onclick="toggleFilters()">Filter</button>
+                    <div id="filter-options" style="display: none;">
+                        <label><input type="checkbox" name="filter" value="sponsors" {% if 'sponsors' in filter_options %}checked{% endif %}> Sponsors</label>
+                        <label><input type="checkbox" name="filter" value="influencers" {% if 'influencers' in filter_options %}checked{% endif %}> Influencers</label>
+                        <label><input type="checkbox" name="filter" value="campaigns" {% if 'campaigns' in filter_options %}checked{% endif %}> Campaigns</label>
+                    </div>
+                </form>
             </div>
-            <div class="campaign">
-                <span>Sponsor Name | Details</span>
-                <button class="view-btn">View</button>
-                <button class="flag-btn">Flag</button>
-            </div>
-            <div class="campaign">
-                <span>Campaign Name | Details</span>
-                <button class="view-btn">View</button>
-                <button class="flag-btn">Flag</button>
-            </div>
-            <div class="campaign">
-                <span>Influencer Name | Details</span>
-                <button class="view-btn">View</button>
-                <button class="flag-btn">Flag</button>
-            </div>
-            <div class="campaign">
-                <span>Influencer Name | Details</span>
-                <button class="view-btn">View</button>
-                <button class="flag-btn">Flag</button>
+            <div id="results">
+                <h2>Sponsors</h2>
+                <div class="result-container" id="sponsors-container">
+                    {% for sponsor in sponsors %}
+                    <div class="result-item" data-type="sponsor" data-id="{{ sponsor.id }}">
+                        <span>{{ sponsor.username }} | {{ sponsor.email }} | {{ sponsor.industry }} | {{ sponsor.property }}</span>
+                        <button class="view-btn">View</button>
+                        <form action="{{ url_for('remove_sponsor', sponsor_id=sponsor.id) }}" method="POST" style="display: inline;">
+                            <button class="flag-btn" onclick="return confirm('Are you sure you want to remove this sponsor?');">Remove</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <h2>Influencers</h2>
+                <div class="result-container" id="influencers-container">
+                    {% for influencer in influencers %}
+                    <div class="result-item" data-type="influencer" data-id="{{ influencer.id }}">
+                        <span>{{ influencer.username }} | {{ influencer.email }}</span>
+                        <button class="view-btn">View</button>
+                        <form action="{{ url_for('remove_influencer', influencer_id=influencer.id) }}" method="POST" style="display: inline;">
+                            <button class="flag-btn" onclick="return confirm('Are you sure you want to remove this influencer?')">Remove</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <h2>Campaigns</h2>
+                <div class="result-container" id="campaigns-container">
+                    {% for campaign in campaigns %}
+                    <div class="result-item" data-type="campaign" data-id="{{ campaign.id }}">
+                        <span>{{ campaign.name }} | {{ campaign.sponsor.username }} | {{ campaign.start_date }} to {{ campaign.end_date }}</span>
+                        <button class="view-btn">View</button>
+                        <form action="{{ url_for('remove_campaign', campaign_id=campaign.id) }}" method="POST" style="display: inline;">
+                            <button class="flag-btn" onclick="return confirm('Are you sure you want to remove this campaign?')">Remove</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </section>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.view-btn').forEach(button => {
+                button.addEventListener('click', event => {
+                    const parent = event.target.closest('.result-item');
+                    const type = parent.getAttribute('data-type');
+                    const id = parent.getAttribute('data-id');
+                    viewDetails(type, id);
+                });
+            });
+        });
+
+        function toggleFilters() {
+            const filterOptions = document.getElementById('filter-options');
+            filterOptions.style.display = filterOptions.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function viewDetails(type, id) {
+            alert(`Viewing details for ${type} with ID: ${id}`);
+        }
+    </script>
 </body>
 </html>
