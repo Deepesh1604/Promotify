@@ -18,7 +18,7 @@
                 <li><a href="#" class="active">Dashboard</a></li>
                 <li><a href="{{ url_for('afind') }}">Find</a></li>
                 <li><a href="{{ url_for('astats') }}">Stats</a></li>
-                <li><a href="{{ url_for('admin_logout') }}">Logout</a></li>
+                <li><a href="{{ url_for('admin_log') }}">Logout</a></li>
             </ul>
         </nav>
     </div>
@@ -27,7 +27,7 @@
             <h1>Admin Dashboard</h1>
             <div class="user-info">
                 <span>Welcome, Admin</span>
-                <a href="{{ url_for('admin_logout') }}" class="logout-btn">Logout</a>
+                <a href="{{ url_for('admin_log') }}" class="logout-btn">Logout</a>
             </div>
         </header>
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -39,12 +39,12 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
-        <div class="search-container">
+        <!-- <div class="search-container">
             <form action="{{ url_for('admin_dash') }}" method="GET">
                 <input type="text" name="search" placeholder="Search campaigns or sponsors..." value="{{ search_query }}">
                 <button type="submit">Search</button>
             </form>
-        </div>
+        </div> -->
         <section class="content">
             <h2>All Campaigns</h2>
             {% for campaign in campaigns %}

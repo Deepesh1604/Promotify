@@ -231,17 +231,6 @@ def view_campaign(campaign_id):
     campaign = Campaign.query.get_or_404(campaign_id)
     return render_template('view_campaign.html', campaign=campaign)
 
-@app.route('/remove_campaign/<int:campaign_id>', methods=['POST'])
-def remove_campaign(campaign_id):
-    if 'admin_logged_in' not in session or not session['admin_logged_in']:
-        flash('You need to log in first.', 'error')
-        return redirect(url_for('admin_log'))
-
-    campaign = Campaign.query.get_or_404(campaign_id)
-    db.session.delete(campaign)
-    db.session.commit()
-    flash(f'Campaign "{campaign.name}" has been removed.', 'success')
-    return redirect(url_for('admin_dash'))
 
 @app.route('/alogin', methods=['GET', 'POST'])
 def admin_log():
@@ -260,14 +249,12 @@ def admin_log():
     return render_template('admin_log.html')
 
 
-@app.route('/alogout')
-def admin_logout():
-    session.pop('admin_logged_in', None)
-    flash('You have been logged out.', 'success')
-    return redirect(url_for('index'))
-
 @app.route('/afind')
 def afind():
+    if 'admin_logged_in' not in session or not session['admin_logged_in']:
+        flash('You need to log in first.', 'error')
+        return redirect(url_for('admin_log'))
+
     search_query = request.args.get('search', '')
     filter_options = request.args.getlist('filter')
     
@@ -291,7 +278,6 @@ def afind():
                            search_query=search_query, 
                            filter_options=filter_options)
 
-
 @app.route('/remove_sponsor/<int:sponsor_id>', methods=['POST'])
 def remove_sponsor(sponsor_id):
     if 'admin_logged_in' not in session or not session['admin_logged_in']:
@@ -302,7 +288,11 @@ def remove_sponsor(sponsor_id):
     db.session.delete(sponsor)
     db.session.commit()
     flash(f'Sponsor "{sponsor.username}" has been removed.', 'success')
-    return redirect(url_for('afind'))
+    
+    # Redirect back to afind with the same search query and filters
+    search_query = request.args.get('search', '')
+    filter_options = request.args.getlist('filter')
+    return redirect(url_for('afind', search=search_query, filter=filter_options))
 
 @app.route('/remove_influencer/<int:influencer_id>', methods=['POST'])
 def remove_influencer(influencer_id):
@@ -314,8 +304,27 @@ def remove_influencer(influencer_id):
     db.session.delete(influencer)
     db.session.commit()
     flash(f'Influencer "{influencer.username}" has been removed.', 'success')
-    return redirect(url_for('afind'))
+    
+    # Redirect back to afind with the same search query and filters
+    search_query = request.args.get('search', '')
+    filter_options = request.args.getlist('filter')
+    return redirect(url_for('afind', search=search_query, filter=filter_options))
 
+@app.route('/remove_campaign/<int:campaign_id>', methods=['POST'])
+def remove_campaign(campaign_id):
+    if 'admin_logged_in' not in session or not session['admin_logged_in']:
+        flash('You need to log in first.', 'error')
+        return redirect(url_for('admin_log'))
+
+    campaign = Campaign.query.get_or_404(campaign_id)
+    db.session.delete(campaign)
+    db.session.commit()
+    flash(f'Campaign "{campaign.name}" has been removed.', 'success')
+    
+    # Redirect back to afind with the same search query and filters
+    search_query = request.args.get('search', '')
+    filter_options = request.args.getlist('filter')
+    return redirect(url_for('afind', search=search_query, filter=filter_options))
 @app.route('/astats')
 def astats():
     if 'admin_logged_in' in session and session['admin_logged_in']:
