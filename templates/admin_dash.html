@@ -17,7 +17,7 @@
             <ul>
                 <li><a href="#" class="active">Dashboard</a></li>
                 <li><a href="{{ url_for('afind') }}">Find</a></li>
-                <li><a href="{{ url_for('astats') }}">Stats</a></li>
+                <li><a href="{{ url_for('admin_stats') }}">Stats</a></li>
                 <li><a href="{{ url_for('admin_log') }}">Logout</a></li>
             </ul>
         </nav>
@@ -39,6 +39,30 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
+        
+        <div class="stats-container">
+            <div class="stat-box">
+                <h3>Total Users</h3>
+                <p>{{ stats.total_users }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Total Influencers</h3>
+                <p>{{ stats.total_influencers }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Total Sponsors</h3>
+                <p>{{ stats.total_sponsors }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Total Campaigns</h3>
+                <p>{{ stats.total_campaigns }}</p>
+            </div>
+            <div class="stat-box">
+                <h3>Active Campaigns</h3>
+                <p>{{ stats.active_campaigns }}</p>
+            </div>
+        </div>
+        
         <!-- <div class="search-container">
             <form action="{{ url_for('admin_dash') }}" method="GET">
                 <input type="text" name="search" placeholder="Search campaigns or sponsors..." value="{{ search_query }}">

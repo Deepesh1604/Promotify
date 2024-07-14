@@ -117,10 +117,13 @@ h1, h2 {
 }
 
 .logout-btn {
+    color: #ffffff;
+    width: 55px;
     background-color: #ff5252;
 }
 
 .logout-btn:hover {
+    
     background-color: #e64545;
 }
 

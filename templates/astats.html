@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Stats</title>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/astats.css') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Stats</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/astats.css') }}">
 </head>
 <body>
     <div class="sidebar">
         <header>
             <div class="logo">
-                <img src="../static/images/promotify.png" alt="">
+                <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="">
             </div>
         </header>
         <nav>
             <ul>
-                <li><a href="/adash">Dashboard</a></li>
-                <li><a href="/afind">Find</a></li>
-                <li><a href="#stats">Stats</a></li>
-                <li><a href="#logout">Logout</a></li>
+                <li><a href="{{ url_for('admin_dash') }}">Profile</a></li>
+                <li><a href="{{ url_for('afind') }}">Find</a></li>
+                <li><a href="#"class="active">Stats</a></li>
+                <li><a href="{{ url_for('admin_log') }}">Logout</a></li>
             </ul>
         </nav>
     </div>
@@ -34,69 +34,98 @@
         <section id="stats">
             <div class="stats-container">
                 <div class="chart">
-                    <h2>Campaign Progress</h2>
-                    <canvas id="campaignProgress"></canvas>
+                    <h2>User Distribution</h2>
+                    <canvas id="userDistribution"></canvas>
                 </div>
                 <div class="chart">
-                    <h2>Influencer Engagement</h2>
-                    <canvas id="influencerEngagement"></canvas>
+                    <h2>Campaign Status</h2>
+                    <canvas id="campaignCount"></canvas>
+                </div>
+                <div class="chart">
+                    <h2>Top 5 Sponsor Industries</h2>
+                    <canvas id="topIndustries"></canvas>
                 </div>
             </div>
         </section>
     </div>
     <script>
-        const ctx1 = document.getElementById('campaignProgress').getContext('2d');
-        const campaignProgress = new Chart(ctx1, {
-            type: 'bar',
+        // User Distribution Chart
+        const userDistributionData = JSON.parse('{{ user_distribution | safe }}');
+        new Chart(document.getElementById('userDistribution').getContext('2d'), {
+            type: 'pie',
             data: {
-                labels: ['Campaign 1', 'Campaign 2', 'Campaign 3'],
+                labels: userDistributionData.labels,
                 datasets: [{
-                    label: 'Progress (%)',
-                    data: [60, 70, 80],
-                    backgroundColor: '#1db954'
+                    data: userDistributionData.data,
+                    backgroundColor: ['rgb(255, 99, 132)', 'rgb(54, 162, 235)']
                 }]
             },
             options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            color: '#ffffff'
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            color: '#ffffff'
-                        }
-                    }
-                },
+                responsive: true,
                 plugins: {
-                    legend: {
-                        labels: {
-                            color: '#ffffff'
-                        }
+                    title: {
+                        display: true,
+                        text: 'User Distribution'
                     }
                 }
             }
         });
 
-        const ctx2 = document.getElementById('influencerEngagement').getContext('2d');
-        const influencerEngagement = new Chart(ctx2, {
-            type: 'pie',
+        // Campaign Count Chart
+        const campaignCountData = JSON.parse('{{ campaign_count | safe }}');
+        new Chart(document.getElementById('campaignCount').getContext('2d'), {
+            type: 'bar',
             data: {
-                labels: ['Instagram', 'Twitter', 'YouTube', 'LinkedIn'],
+                labels: campaignCountData.labels,
                 datasets: [{
-                    label: 'Engagement (%)',
-                    data: [30, 20, 25, 25],
-                    backgroundColor: ['#1db954', '#1a75ff', '#ff4d4d', '#ffa31a']
+                    label: 'Number of Campaigns',
+                    data: campaignCountData.data,
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(255, 159, 64, 0.6)',
+                        'rgba(255, 205, 86, 0.6)'
+                    ]
                 }]
             },
             options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
                 plugins: {
-                    legend: {
-                        labels: {
-                            color: '#ffffff'
-                        }
+                    title: {
+                        display: true,
+                        text: 'Campaign Status'
+                    }
+                }
+            }
+        });
+
+        // Top Industries Chart
+        const topIndustriesData = JSON.parse('{{ top_industries | safe }}');
+        new Chart(document.getElementById('topIndustries').getContext('2d'), {
+            type: 'horizontalBar',
+            data: {
+                labels: topIndustriesData.labels,
+                datasets: [{
+                    label: 'Number of Sponsors',
+                    data: topIndustriesData.data,
+                    backgroundColor: 'rgba(153, 102, 255, 0.6)'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Top 5 Sponsor Industries'
                     }
                 }
             }

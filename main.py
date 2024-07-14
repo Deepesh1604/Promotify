@@ -1,14 +1,15 @@
 from flask import Flask, render_template, redirect, url_for, request, flash, session
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime , timedelta
 import sqlalchemy
 from sqlalchemy import func
 from sqlalchemy import or_
+import json
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'your_secret_key'  # Replace with your own secret key
+app.config['SECRET_KEY'] = 'your_secret_key'  
 db = SQLAlchemy(app)
 
 ADMIN_EMAIL = 'admin@gmail.com'
@@ -23,6 +24,7 @@ class Influencer(db.Model):
     linkedin = db.Column(db.String(150), unique=True, nullable=True)
     twitter = db.Column(db.String(150), unique=True, nullable=True)
     youtube = db.Column(db.String(150), unique=True, nullable=True)
+    date_joined = db.Column(db.DateTime, default=datetime.utcnow)  # Add this line
     campaigns = db.relationship('Campaign', secondary='application', 
                                 primaryjoin="and_(Influencer.id==Application.influencer_id, Application.status=='accepted')",
                                 backref=db.backref('accepted_influencers', lazy='dynamic'))
@@ -33,6 +35,7 @@ class Sponsor(db.Model):
     email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
     industry = db.Column(db.String(150), nullable=False)
+    date_joined = db.Column(db.DateTime, default=datetime.utcnow)  # Add this line
 
 class Campaign(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -55,7 +58,7 @@ class Application(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     influencer_id = db.Column(db.Integer, db.ForeignKey('influencer.id'), nullable=False)
     campaign_id = db.Column(db.Integer, db.ForeignKey('campaign.id'), nullable=False)
-    status = db.Column(db.String(20), default='pending')  # 'pending', 'accepted', or 'rejected'
+    status = db.Column(db.String(20), default='pending') 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     influencer = db.relationship('Influencer', backref=db.backref('applications', lazy=True))
@@ -63,6 +66,8 @@ class Application(db.Model):
 
     def __repr__(self):
         return f"<Application {self.id}: {self.influencer.username} for {self.campaign.name}>"
+
+# Routing started
 
 @app.route('/')
 def index():
@@ -88,7 +93,7 @@ def spon_logout():
     session.pop('sponsor_logged_in', None)
     session.pop('sponsor_id', None)
     flash('You have been logged out.', 'success')
-    return redirect(url_for('index'))
+    return redirect(url_for('spon_log'))
 
 @app.route('/sreg', methods=['GET', 'POST'])
 def spon_reg():
@@ -172,7 +177,7 @@ def influ_dash(campaign_id=None):
 @app.route('/ilogout')
 def influ_logout():
     session.pop('influencer_id', None)
-    return redirect(url_for('index'))
+    return redirect(url_for('influ_log'))
 
 @app.route('/adash')
 def admin_dash():
@@ -206,31 +211,37 @@ def admin_dash():
         days_passed = (datetime.utcnow().date() - campaign.start_date).days
         campaign.progress = min(max(int((days_passed / total_days) * 100), 0), 100)
 
+    # Calculate stats
+    total_users = Influencer.query.count() + Sponsor.query.count()
+    total_influencers = Influencer.query.count()
+    total_sponsors = Sponsor.query.count()
+    total_campaigns = Campaign.query.count()
+    active_campaigns = Campaign.query.filter(
+        Campaign.start_date <= datetime.utcnow().date(),
+        Campaign.end_date >= datetime.utcnow().date()
+    ).count()
+
+    stats = {
+        'total_users': total_users,
+        'total_influencers': total_influencers,
+        'total_sponsors': total_sponsors,
+        'total_campaigns': total_campaigns,
+        'active_campaigns': active_campaigns
+    }
+
     return render_template('admin_dash.html', 
                            campaigns=campaigns,
-                           search_query=search_query)
+                           search_query=search_query,
+                           stats=stats)
 
-# @app.route('/delete_campaign/<int:campaign_id>', methods=['POST'])
-# def delete_campaign(campaign_id):
+# @app.route('/view_campaign/<int:campaign_id>')
+# def view_campaign(campaign_id):
 #     if 'admin_logged_in' not in session or not session['admin_logged_in']:
 #         flash('You need to log in first.', 'error')
 #         return redirect(url_for('admin_log'))
 
 #     campaign = Campaign.query.get_or_404(campaign_id)
-#     db.session.delete(campaign)
-#     db.session.commit()
-#     flash(f'Campaign "{campaign.name}" has been deleted.', 'success')
-#     return redirect(url_for('admin_dash'))
-
-@app.route('/view_campaign/<int:campaign_id>')
-def view_campaign(campaign_id):
-    if 'admin_logged_in' not in session or not session['admin_logged_in']:
-        flash('You need to log in first.', 'error')
-        return redirect(url_for('admin_log'))
-
-    campaign = Campaign.query.get_or_404(campaign_id)
-    return render_template('view_campaign.html', campaign=campaign)
-
+#     return render_template('view_campaign.html', campaign=campaign)
 
 @app.route('/alogin', methods=['GET', 'POST'])
 def admin_log():
@@ -248,6 +259,12 @@ def admin_log():
 
     return render_template('admin_log.html')
 
+
+@app.route('/alogout')
+def admin_logout():
+    session.pop('admin_logged_in', None)
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('admin_log'))
 
 @app.route('/afind')
 def afind():
@@ -278,6 +295,8 @@ def afind():
                            search_query=search_query, 
                            filter_options=filter_options)
 
+
+
 @app.route('/remove_sponsor/<int:sponsor_id>', methods=['POST'])
 def remove_sponsor(sponsor_id):
     if 'admin_logged_in' not in session or not session['admin_logged_in']:
@@ -289,7 +308,6 @@ def remove_sponsor(sponsor_id):
     db.session.commit()
     flash(f'Sponsor "{sponsor.username}" has been removed.', 'success')
     
-    # Redirect back to afind with the same search query and filters
     search_query = request.args.get('search', '')
     filter_options = request.args.getlist('filter')
     return redirect(url_for('afind', search=search_query, filter=filter_options))
@@ -305,7 +323,6 @@ def remove_influencer(influencer_id):
     db.session.commit()
     flash(f'Influencer "{influencer.username}" has been removed.', 'success')
     
-    # Redirect back to afind with the same search query and filters
     search_query = request.args.get('search', '')
     filter_options = request.args.getlist('filter')
     return redirect(url_for('afind', search=search_query, filter=filter_options))
@@ -321,17 +338,90 @@ def remove_campaign(campaign_id):
     db.session.commit()
     flash(f'Campaign "{campaign.name}" has been removed.', 'success')
     
-    # Redirect back to afind with the same search query and filters
     search_query = request.args.get('search', '')
     filter_options = request.args.getlist('filter')
     return redirect(url_for('afind', search=search_query, filter=filter_options))
+
+    influencer = Influencer.query.get_or_404(influencer_id)
+    db.session.delete(influencer)
+    db.session.commit()
+    flash(f'Influencer "{influencer.username}" has been removed.', 'success')
+    return redirect(url_for('a_find'))
+
+from sqlalchemy import func, extract
+
+def get_user_growth_data():
+    end_date = datetime.utcnow()
+    start_date = end_date - timedelta(days=180)  # Last 6 months
+    
+    new_users = db.session.query(
+        func.strftime('%Y-%m', Influencer.date_joined).label('month'),
+        func.count(Influencer.id).label('count')
+    ).filter(Influencer.date_joined >= start_date).group_by('month').all()
+    
+    new_users += db.session.query(
+        func.strftime('%Y-%m', Sponsor.date_joined).label('month'),
+        func.count(Sponsor.id).label('count')
+    ).filter(Sponsor.date_joined >= start_date).group_by('month').all()
+    
+    # Process the data into the format needed for the chart
+    months = [start_date + timedelta(days=30*i) for i in range(6)]
+    new_user_data = [sum(nu.count for nu in new_users if nu.month == month.strftime('%Y-%m')) for month in months]
+    
+    return {
+        'labels': [month.strftime('%b') for month in months],
+        'new_users': new_user_data,
+    }
+
+# ... (your existing imports and app setup)
+
+def get_user_distribution():
+    influencer_count = Influencer.query.count()
+    sponsor_count = Sponsor.query.count()
+    
+    return {
+        'labels': ['Influencers', 'Sponsors'],
+        'data': [influencer_count, sponsor_count]
+    }
+
+def get_campaign_count():
+    active_count = Campaign.query.filter(
+        Campaign.start_date <= datetime.utcnow(),
+        Campaign.end_date >= datetime.utcnow()
+    ).count()
+    completed_count = Campaign.query.filter(
+        Campaign.end_date < datetime.utcnow()
+    ).count()
+    upcoming_count = Campaign.query.filter(
+        Campaign.start_date > datetime.utcnow()
+    ).count()
+    
+    return {
+        'labels': ['Active', 'Completed', 'Upcoming'],
+        'data': [active_count, completed_count, upcoming_count]
+    }
+
+def get_top_industries():
+    top_industries = db.session.query(
+        Sponsor.industry, 
+        func.count(Sponsor.id).label('count')
+    ).group_by(Sponsor.industry).order_by(func.count(Sponsor.id).desc()).limit(5).all()
+    
+    return {
+        'labels': [industry for industry, _ in top_industries],
+        'data': [count for _, count in top_industries]
+    }
+
 @app.route('/astats')
-def astats():
-    if 'admin_logged_in' in session and session['admin_logged_in']:
-        return render_template('astats.html')
-    else:
-        flash('You need to log in first.', 'error')
-        return redirect(url_for('admin_log'))
+def admin_stats():
+    user_distribution = get_user_distribution()
+    campaign_count = get_campaign_count()
+    top_industries = get_top_industries()
+
+    return render_template('astats.html',
+                           user_distribution=json.dumps(user_distribution),
+                           campaign_count=json.dumps(campaign_count),
+                           top_industries=json.dumps(top_industries))
     
 @app.route('/istats')
 def influ_stats():
