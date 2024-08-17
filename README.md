@@ -1,8 +1,7 @@
 # Promotify - Bridging Sponsors and Influencers
 
 ### Author
-**Name:**  
-- **Deepesh Kumar Dawar**
+**Name:**  **Deepesh Kumar Dawar**
 
 ---
 
