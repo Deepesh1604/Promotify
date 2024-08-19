@@ -13,7 +13,7 @@ app.config['SECRET_KEY'] = 'your_secret_key'
 db = SQLAlchemy(app)#creates a SQLAlchemy object and binds it to your Flask application
 
 ADMIN_EMAIL = 'admin@gmail.com'
-ADMIN_PASSWORD = 'admin123'
+ADMIN_PASSWORD = 'admin@123'
 
 class Influencer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
