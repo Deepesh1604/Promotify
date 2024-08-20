@@ -17,13 +17,13 @@ ADMIN_PASSWORD = 'admin@123'
 
 class Influencer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), unique=True, nullable=False)
-    email = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=False)
-    instagram = db.Column(db.String(150), unique=True, nullable=True)
-    linkedin = db.Column(db.String(150), unique=True, nullable=True)
-    twitter = db.Column(db.String(150), unique=True, nullable=True)
-    youtube = db.Column(db.String(150), unique=True, nullable=True)
+    username = db.Column(db.String(15), unique=True, nullable=False)
+    email = db.Column(db.String(30), unique=True, nullable=False)
+    password = db.Column(db.String(10), nullable=False)
+    instagram = db.Column(db.String(15), unique=True, nullable=True)
+    linkedin = db.Column(db.String(20), unique=True, nullable=True)
+    twitter = db.Column(db.String(20), unique=True, nullable=True)
+    youtube = db.Column(db.String(20), unique=True, nullable=True)
     date_joined = db.Column(db.DateTime, default=datetime.utcnow)  # Add this line
     campaigns = db.relationship('Campaign', secondary='application', 
                                 primaryjoin="and_(Influencer.id==Application.influencer_id, Application.status=='accepted')",
