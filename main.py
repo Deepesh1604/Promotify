@@ -31,16 +31,16 @@ class Influencer(db.Model):
 
 class Sponsor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), unique=True, nullable=False)
-    email = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=False)
-    industry = db.Column(db.String(150), nullable=False)
+    username = db.Column(db.String(15), unique=True, nullable=False)
+    email = db.Column(db.String(20), unique=True, nullable=False)
+    password = db.Column(db.String(10), nullable=False)
+    industry = db.Column(db.String(20), nullable=False)
     date_joined = db.Column(db.DateTime, default=datetime.utcnow)  # Add this line
 
 class Campaign(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sponsor_id = db.Column(db.Integer, db.ForeignKey('sponsor.id'), nullable=False)
-    name = db.Column(db.String(150), nullable=False)
+    name = db.Column(db.String(15), nullable=False)
     description = db.Column(db.Text, nullable=True)
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
