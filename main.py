@@ -67,7 +67,6 @@ class Application(db.Model):
     def __repr__(self):
         return f"<Application {self.id}: {self.influencer.username} for {self.campaign.name}>"
 
-# Routing started
 
 @app.route('/')
 def index():
