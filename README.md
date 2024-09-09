@@ -36,7 +36,7 @@ The database model includes tables for **Sponsors**, **Influencers**, **Campaign
 - **Campaigns** encompass details such as `name`, `description`, `dates`, and `budget`.  
 - **Applications** link Influencers to Campaigns with a `status` field. 
 
-This schema forms the foundation for managing user accounts, campaign information, and application processes in the **Promotify** application.
+This schema forms the foundation for managing user accounts, campaign information, and application processes in the **Promotify** application
 
 ---
 
