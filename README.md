@@ -64,4 +64,4 @@ In the root folder, we have the following key components:
 - **Analytics and statistics** for user growth and campaign performance
 - **CRUD operations** for campaigns and user profiles.
 
-The application implements proper front-end and back-end validation for user inputs. It features separate login forms for **Sponsors**, **Influencers**, and **Admins**, with secure role-based access control. The platform includes comprehensive CRUD features for **Campaigns** and **Applications**. Sponsors can review and manage applications, while Admins have the ability to oversee all platform activities, including user management and campaign moderation
+The application implements proper front-end and back-end validation for user inputs. It features separate login forms for **Sponsors**, **Influencers**, and **Admins**, with secure role-based access control. The platform includes comprehensive CRUD features for **Campaigns** and **Applications**. Sponsors can review and manage applications, while Admins have the ability to oversee all platform activities, including user management and campaign moderation.
