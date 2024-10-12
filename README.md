@@ -31,7 +31,7 @@ Designed with user-friendliness in mind, **Promotify** makes it effortless for S
 
 ## 🗂️ DB Schema Design
 
-The database model includes tables for **Sponsors**, **Influencers**, **Campaigns**, and **Applications**.  
+The database model includes tables for **Sponsors**, **Influencers**, **Campaigns**, and **Applications**
 - **Sponsors** and **Influencers** are defined by `id`, `username`, `email`, `password`, and additional profile information.  
 - **Campaigns** encompass details such as `name`, `description`, `dates`, and `budget`.  
 - **Applications** link Influencers to Campaigns with a `status` field. 
