@@ -3,99 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sponsor Dashboard</title>
+    <title>Sponsor Dashboard - Promotify</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/sdash.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="sidebar">
-        <div class="container">
-            <header>
-                <div class="logo">
-                    <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify Logo">
-                </div>
-            </header>
+    <!-- Background Animation -->
+    <div class="background">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify">
+                <span class="logo-text">Promotify</span>
+            </div>
+            <div class="sponsor-badge">
+                <i class="fas fa-handshake"></i>
+                <span>Sponsor</span>
+            </div>
         </div>
-        <nav>
+        <nav class="sidebar-nav">
             <ul>
-                <li><a href="#" class="active">Profile</a></li>
-                <li><a href="{{ url_for('spon_camp') }}">Create Campaign</a></li>
-                <li><a href="{{ url_for('sfind') }}">Find</a></li>
-                <li><a href="{{ url_for('sstats') }}">Stats</a></li>
-                <li><a href="{{ url_for('spon_logout') }}">Logout</a></li>
+                <li class="nav-item active">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('spon_camp') }}" class="nav-link">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Create Campaign</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('sfind') }}" class="nav-link">
+                        <i class="fas fa-search"></i>
+                        <span>Find Influencers</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('sstats') }}" class="nav-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item logout">
+                    <a href="{{ url_for('spon_logout') }}" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
             </ul>
         </nav>
-    </div>
-    <div class="main-content">
-        <header>
-            <h1>Sponsor Dashboard</h1>
+    </aside>
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Content Header -->
+        <header class="content-header">
+            <div class="header-left">
+                <h1><i class="fas fa-tachometer-alt"></i>Sponsor Dashboard</h1>
+                <p class="header-subtitle">Manage your campaigns and track influencer partnerships</p>
+            </div>
             <div class="user-info">
-                <span>Welcome, {{ sponsor.username }}</span>
-                <a href="{{ url_for('spon_logout') }}" class="logout-btn">Logout</a>
+                <div class="user-avatar">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="user-details">
+                    <span class="user-name">{{ sponsor.username }}</span>
+                    <span class="user-role">Brand Sponsor</span>
+                </div>
             </div>
         </header>
+
         <div class="content">
-            <h2>Your Campaigns:</h2>
-            {% if campaigns %}
-                {% for campaign in campaigns %}
-                <div class="campaign">
-                    <span>{{ campaign.name }}</span>
-                    
-                    <form action="{{ url_for('delete_campaign', campaign_id=campaign.id) }}" method="POST" style="display: inline;">
-                        <button type="submit" class="delete-btn" onclick="return confirm('Are you sure you want to delete this campaign?')">Delete</button>
-                    </form>
+            <!-- Campaigns Section -->
+            <div class="campaigns-section content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-bullhorn"></i>
+                    Your Campaigns
+                </h2>
+                
+                {% if campaigns %}
+                    <div class="campaigns-grid">
+                        {% for campaign in campaigns %}
+                        <div class="campaign-card">
+                            <div class="campaign-header">
+                                <div>
+                                    <div class="campaign-name">{{ campaign.name }}</div>
+                                    <div class="campaign-status status-active">Active</div>
+                                </div>
+                            </div>
+                            <p class="campaign-description">{{ campaign.description or 'No description available.' }}</p>
+                            <div class="campaign-actions">
+                                <a href="{{ url_for('spon_dash', campaign_id=campaign.id) }}" class="btn btn-primary">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                                <form action="{{ url_for('delete_campaign', campaign_id=campaign.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this campaign?')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-bullhorn"></i>
+                        <p>You haven't created any campaigns yet.</p>
+                    </div>
+                {% endif %}
+                
+                <div class="action-section">
+                    <a href="{{ url_for('spon_camp') }}" class="create-campaign-btn">
+                        <i class="fas fa-plus"></i>
+                        Create New Campaign
+                    </a>
                 </div>
-                {% endfor %}
-            {% else %}
-                <p>You haven't created any campaigns yet.</p>
-            {% endif %}
-            <a href="{{ url_for('spon_camp') }}" class="create-btn">Create New Campaign</a>
+            </div>
 
             {% if selected_campaign %}
-            <div class="campaign-details">
-                <h2>Campaign Details</h2>
-                <h3>{{ selected_campaign.name }}</h3>
-                <p>Description: {{ selected_campaign.description or 'No description available.' }}</p>
-                <!-- Add more details as needed -->
-                <h4>Accepted Influencers:</h4>
-                <ul>
-                    {% for influencer in selected_campaign.accepted_influencers %}
-                    <li>{{ influencer.username }}</li>
-                    {% else %}
-                    <li>No influencers accepted yet.</li>
-                    {% endfor %}
-                </ul>
+            <div class="details-section">
+                <h2 class="details-title">
+                    <i class="fas fa-info-circle"></i>
+                    Campaign Details: {{ selected_campaign.name }}
+                </h2>
+                <div class="details-content">
+                    <p><strong>Description:</strong> {{ selected_campaign.description or 'No description available.' }}</p>
+                    <p><strong>Budget:</strong> ${{ "{:,.2f}".format(selected_campaign.budget) }}</p>
+                    <p><strong>Duration:</strong> {{ selected_campaign.start_date }} to {{ selected_campaign.end_date }}</p>
+                    
+                    <h4 style="margin-top: 20px; color: var(--text-primary);">Accepted Influencers:</h4>
+                    <ul class="influencer-list">
+                        {% for influencer in selected_campaign.accepted_influencers %}
+                        <li><i class="fas fa-user"></i> {{ influencer.username }}</li>
+                        {% else %}
+                        <li><i class="fas fa-info-circle"></i> No influencers accepted yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
             {% endif %}
 
-            <h2>Influencer Applications:</h2>
-            {% if applications %}
-                {% for application in applications %}
-                <div class="campaign">
-                    <span>{{ application.campaign.name }} | Influencer: {{ application.influencer.username }}</span>
-                    <a href="{{ url_for('spon_dash', application_id=application.id) }}" class="view-btn">View Details</a>
-                    <form action="{{ url_for('accept_application', application_id=application.id) }}" method="POST" style="display: inline;">
-                        <button type="submit" class="accept-btn">Accept</button>
-                    </form>
-                    <form action="{{ url_for('reject_application', application_id=application.id) }}" method="POST" style="display: inline;">
-                        <button type="submit" class="reject-btn">Reject</button>
-                    </form>
-                </div>
-                {% endfor %}
-            {% else %}
-                <p>No pending applications at the moment.</p>
-            {% endif %}
+            <!-- Section Divider -->
+            <div class="section-divider"></div>
+
+            <!-- Applications Section -->
+            <div class="applications-section content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-inbox"></i>
+                    Pending Applications
+                </h2>
+                
+                {% if applications %}
+                    <div class="applications-grid">
+                        {% for application in applications %}
+                        <div class="application-card">
+                            <div class="application-info">
+                                <div class="application-campaign">{{ application.campaign.name }}</div>
+                                <div class="application-influencer">
+                                    <i class="fas fa-user"></i> {{ application.influencer.username }}
+                                </div>
+                            </div>
+                            <div class="application-actions">
+                                <a href="{{ url_for('spon_dash', application_id=application.id) }}" class="btn btn-primary">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                <form action="{{ url_for('accept_application', application_id=application.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-check"></i> Accept
+                                    </button>
+                                </form>
+                                <form action="{{ url_for('reject_application', application_id=application.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fas fa-times"></i> Reject
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No pending applications at the moment.</p>
+                    </div>
+                {% endif %}
+            </div>
 
             {% if selected_application %}
-            <div class="application-details">
-                <h2>Application Details</h2>
-                <h3>Campaign: {{ selected_application.campaign.name }}</h3>
-                <p>Influencer: {{ selected_application.influencer.username }}</p>
-                <p>Status: {{ selected_application.status }}</p>
-                <p>Applied on: {{ selected_application.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-                <!-- Add more details as needed -->
+            <div class="details-section">
+                <h2 class="details-title">
+                    <i class="fas fa-file-alt"></i>
+                    Application Details
+                </h2>
+                <div class="details-content">
+                    <p><strong>Campaign:</strong> {{ selected_application.campaign.name }}</p>
+                    <p><strong>Influencer:</strong> {{ selected_application.influencer.username }}</p>
+                    <p><strong>Status:</strong> <span class="status-badge">{{ selected_application.status.title() }}</span></p>
+                    <p><strong>Applied on:</strong> {{ selected_application.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                </div>
             </div>
             {% endif %}
         </div>
-    </div>
+    </main>
 </body>
 </html>

@@ -3,75 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sponsor Dashboard - Find</title>
+    <title>Find Influencers - Promotify</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/sfind.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="sidebar">
-        <header>
+    <!-- Background Animation -->
+    <div class="background">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
             <div class="logo">
-                <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify Logo">
+                <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify">
+                <span class="logo-text">Promotify</span>
             </div>
-        </header>
-        <nav>
+            <div class="sponsor-badge">
+                <i class="fas fa-handshake"></i>
+                <span>Sponsor</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
             <ul>
-                <li><a href="{{ url_for('spon_dash') }}">Profile</a></li>
-                <li><a href="{{ url_for('spon_camp') }}">Campaigns</a></li>
-                <li><a href="{{ url_for('sfind') }}" class="active">Find</a></li>
-                <li><a href="{{ url_for('sstats') }}">Stats</a></li>
-                <li><a href="{{ url_for('spon_logout') }}">Logout</a></li>
+                <li class="nav-item">
+                    <a href="{{ url_for('spon_dash') }}" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('spon_camp') }}" class="nav-link">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Create Campaign</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-search"></i>
+                        <span>Find Influencers</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('sstats') }}" class="nav-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item logout">
+                    <a href="{{ url_for('spon_logout') }}" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
             </ul>
         </nav>
-    </div>
-    <div class="main-content">
-        <header>
-            <h1>Sponsor Dashboard - Find</h1>
+    </aside>
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Content Header -->
+        <header class="content-header">
+            <div class="header-left">
+                <h1><i class="fas fa-search"></i>Find Influencers</h1>
+                <p class="header-subtitle">Discover and connect with talented content creators</p>
+            </div>
             <div class="user-info">
-                <span>Welcome, Sponsor</span>
-                <a href="{{ url_for('spon_logout') }}" class="logout-btn">Logout</a>
+                <div class="user-avatar">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="user-details">
+                    <span class="user-name">Brand Sponsor</span>
+                    <span class="user-role">Discovery Mode</span>
+                </div>
             </div>
         </header>
-        <div class="search-container">
-            <form action="{{ url_for('sfind') }}" method="GET">
-                <input type="text" name="search" placeholder="Search influencers by username..." value="{{ search_query }}">
-                <button type="submit">Search</button>
-            </form>
-        </div>
-        
-        {% if searched_influencer %}
-        <div class="influencer-details">
-            <h2>Influencer Details</h2>
-            <p><strong>Username:</strong> {{ searched_influencer.username }}</p>
-            <p><strong>Email:</strong> {{ searched_influencer.email }}</p>
-            <p><strong>Instagram:</strong> {{ searched_influencer.instagram or 'N/A' }}</p>
-            <p><strong>LinkedIn:</strong> {{ searched_influencer.linkedin or 'N/A' }}</p>
-            <p><strong>Twitter:</strong> {{ searched_influencer.twitter or 'N/A' }}</p>
-            <p><strong>YouTube:</strong> {{ searched_influencer.youtube or 'N/A' }}</p>
-        </div>
-        {% endif %}
 
-        <div class="results">
-            <!-- <h2>Available Influencers</h2>
-            {% for influencer in influencers %}
-            <div class="result-item">
-                <span>{{ influencer.username }} - {{ influencer.email }}</span>
-                <a href="{{ url_for('sfind', search=influencer.username) }}" class="view-btn">View</a>
-                <button class="request-btn">Request</button>
+        <div class="content">
+            <!-- Search Section -->
+            <div class="search-section">
+                <h2 class="search-title">
+                    <i class="fas fa-user-search"></i>
+                    Search Influencers
+                </h2>
+                <form action="{{ url_for('sfind') }}" method="GET" class="search-form">
+                    <input type="text" name="search" class="search-input" placeholder="Search influencers by username..." value="{{ search_query }}">
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i>
+                        Search
+                    </button>
+                </form>
             </div>
-            {% endfor %} -->
+            
+            {% if searched_influencer %}
+            <div class="details-card">
+                <h2 class="details-title">
+                    <i class="fas fa-user-circle"></i>
+                    Influencer Profile: {{ searched_influencer.username }}
+                </h2>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <i class="fas fa-user"></i>
+                        <span class="detail-label">Username:</span>
+                        <span class="detail-value">{{ searched_influencer.username }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-envelope"></i>
+                        <span class="detail-label">Email:</span>
+                        <span class="detail-value">{{ searched_influencer.email }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fab fa-instagram"></i>
+                        <span class="detail-label">Instagram:</span>
+                        <span class="detail-value">{{ searched_influencer.instagram or 'Not provided' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fab fa-linkedin"></i>
+                        <span class="detail-label">LinkedIn:</span>
+                        <span class="detail-value">{{ searched_influencer.linkedin or 'Not provided' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fab fa-twitter"></i>
+                        <span class="detail-label">Twitter:</span>
+                        <span class="detail-value">{{ searched_influencer.twitter or 'Not provided' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fab fa-youtube"></i>
+                        <span class="detail-label">YouTube:</span>
+                        <span class="detail-value">{{ searched_influencer.youtube or 'Not provided' }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
 
-            <h2>Active Campaigns</h2>
-            {% for campaign in campaigns %}
-            <div class="result-item">
-                <span>
-                    {{ campaign.name }} by {{ campaign.sponsor.username }}
-                    <br>Start: {{ campaign.start_date }} | End: {{ campaign.end_date }}
-                    <br>Budget: ${{ campaign.budget }}
-                    <br>{{ campaign.description }}
-                </span>
-            </div>
-            {% endfor %}
+            <!-- Active Campaigns Section -->
+            <h2 class="section-title">
+                <i class="fas fa-bullhorn"></i>
+                Active Campaigns
+            </h2>
+            
+            {% if campaigns %}
+                <div class="campaigns-grid">
+                    {% for campaign in campaigns %}
+                    <div class="campaign-card">
+                        <div class="campaign-header">
+                            <div class="campaign-name">{{ campaign.name }}</div>
+                            <div class="campaign-sponsor">
+                                <i class="fas fa-building"></i>
+                                by {{ campaign.sponsor.username }}
+                            </div>
+                        </div>
+                        <div class="campaign-details">
+                            <div class="campaign-detail">
+                                <span class="label"><i class="fas fa-calendar-start"></i> Start Date:</span>
+                                <span class="value">{{ campaign.start_date }}</span>
+                            </div>
+                            <div class="campaign-detail">
+                                <span class="label"><i class="fas fa-calendar-end"></i> End Date:</span>
+                                <span class="value">{{ campaign.end_date }}</span>
+                            </div>
+                            <div class="campaign-detail">
+                                <span class="label"><i class="fas fa-dollar-sign"></i> Budget:</span>
+                                <span class="value">${{ "{:,.2f}".format(campaign.budget) }}</span>
+                            </div>
+                        </div>
+                        {% if campaign.description %}
+                        <div class="campaign-description">
+                            <i class="fas fa-info-circle"></i>
+                            {{ campaign.description }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-bullhorn"></i>
+                    <h3>No Active Campaigns</h3>
+                    <p>There are currently no active campaigns available. Check back later for new opportunities!</p>
+                </div>
+            {% endif %}
         </div>
-    </div>
+    </main>
 </body>
 </html>
