@@ -67,7 +67,6 @@ class Application(db.Model):
     def __repr__(self):
         return f"<Application {self.id}: {self.influencer.username} for {self.campaign.name}>"
 
-
 @app.route('/')
 def index():
     return render_template('home.html')
@@ -644,4 +643,4 @@ def ifind():
 
 
 if __name__ == "__main__":
-    app.run(debug=True , port = 5000)
+    app.run(debug=True , port = 5003)

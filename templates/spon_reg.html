@@ -3,24 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sponsor Sign Up Page</title>
+    <title>Brand Registration - Promotify</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/sreg.css') }}">
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="">
-        </div>
-    </header>
-    <div class="container">
-        <h2>Sponsor Sign Up</h2>
-        <form id="signupForm" action="{{ url_for('spon_reg') }}" method="POST">
-            <input type="text" name="username" placeholder="Username" required maxlength="10">
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="password" name="password" placeholder="Create Password" required>
-            <input type="text" name="industry" placeholder="Industry" required>
-            <button type="submit">Sign Up</button>
-        </form>
+    <div class="background">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
     </div>
+    
+    <div class="registration-container">
+        <div class="registration-header">
+            <a href="/slogin" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Login</span>
+            </a>
+            <div class="logo">
+                <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify">
+                <span class="logo-text">Promotify</span>
+            </div>
+        </div>
+        
+        <div class="registration-card">
+            <div class="card-header">
+                <h1>Join as a Brand</h1>
+                <p>Create your brand account and start connecting with influencers</p>
+            </div>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="alert-container">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }}"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <form id="signupForm" action="{{ url_for('spon_reg') }}" method="POST" class="registration-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="username">Brand Username</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="username" name="username" placeholder="Choose a unique username" required maxlength="15">
+                        </div>
+                        <span class="input-hint">3-15 characters, alphanumeric only</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Business Email</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="email" name="email" placeholder="business@company.com" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="password" name="password" placeholder="Create a strong password" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('password', 'toggle-icon-1')">
+                                <i class="fas fa-eye" id="toggle-icon-1"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strength-fill"></div>
+                            </div>
+                            <span class="strength-text" id="strength-text">Password strength</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="industry">Industry</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-industry"></i>
+                            <select id="industry" name="industry" required>
+                                <option value="">Select your industry</option>
+                                <option value="Technology">Technology</option>
+                                <option value="Fashion">Fashion</option>
+                                <option value="Beauty">Beauty & Cosmetics</option>
+                                <option value="Food">Food & Beverage</option>
+                                <option value="Travel">Travel & Tourism</option>
+                                <option value="Fitness">Fitness & Health</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Education">Education</option>
+                                <option value="Finance">Finance</option>
+                                <option value="Automotive">Automotive</option>
+                                <option value="Real Estate">Real Estate</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="terms-section">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="terms" required>
+                        <span class="checkmark"></span>
+                        I agree to the <a href="#" class="terms-link">Terms of Service</a> and <a href="#" class="terms-link">Privacy Policy</a>
+                    </label>
+                </div>
+                
+                <button type="submit" class="register-btn" id="register-btn" disabled>
+                    <span>Create Brand Account</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+            
+            <div class="login-section">
+                <p>Already have an account?</p>
+                <a href="{{ url_for('spon_log') }}" class="login-link">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign In Instead
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(iconId);
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Password strength checker
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            const strengthFill = document.getElementById('strength-fill');
+            const strengthText = document.getElementById('strength-text');
+            
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+            
+            const strengthLevels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
+            const strengthColors = ['#dc2626', '#ea580c', '#d97706', '#059669', '#047857'];
+            
+            if (password.length === 0) {
+                strengthFill.style.width = '0%';
+                strengthText.textContent = 'Password strength';
+                strengthText.style.color = '#a1a1aa';
+            } else {
+                const percentage = (strength / 5) * 100;
+                strengthFill.style.width = percentage + '%';
+                strengthFill.style.backgroundColor = strengthColors[strength - 1] || strengthColors[0];
+                strengthText.textContent = strengthLevels[strength - 1] || strengthLevels[0];
+                strengthText.style.color = strengthColors[strength - 1] || strengthColors[0];
+            }
+        }
+
+        // Form validation and enhancement
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('.registration-form');
+            const inputs = form.querySelectorAll('input, select');
+            const termsCheckbox = document.getElementById('terms');
+            const registerBtn = document.getElementById('register-btn');
+            const passwordInput = document.getElementById('password');
+            
+            // Enhanced input interactions
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    if (this.value === '') {
+                        this.parentElement.classList.remove('focused');
+                    }
+                });
+                
+                if (input.value !== '') {
+                    input.parentElement.classList.add('focused');
+                }
+            });
+            
+            // Password strength checking
+            passwordInput.addEventListener('input', function() {
+                checkPasswordStrength(this.value);
+                checkFormValidity();
+            });
+            
+            // Terms checkbox validation
+            termsCheckbox.addEventListener('change', checkFormValidity);
+            
+            // Form validation
+            function checkFormValidity() {
+                const allInputsValid = Array.from(inputs).every(input => input.checkValidity());
+                const termsAccepted = termsCheckbox.checked;
+                const passwordStrong = passwordInput.value.length >= 8;
+                
+                if (allInputsValid && termsAccepted && passwordStrong) {
+                    registerBtn.disabled = false;
+                    registerBtn.classList.add('enabled');
+                } else {
+                    registerBtn.disabled = true;
+                    registerBtn.classList.remove('enabled');
+                }
+            }
+            
+            // Real-time validation
+            inputs.forEach(input => {
+                input.addEventListener('input', checkFormValidity);
+            });
+            
+            // Username validation
+            const usernameInput = document.getElementById('username');
+            usernameInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+            });
+        });
+    </script>
 </body>
 </html>

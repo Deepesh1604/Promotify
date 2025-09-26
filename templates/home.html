@@ -4,29 +4,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome</title>
+    <title>Promotify - Connect Brands with Influencers</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <header>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
             <div class="logo">
-                <img src="../static/images/promotify.png" alt="">
+                <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify">
+                <span class="logo-text">Promotify</span>
             </div>
-            <div class="admin-login"> <a href="/alogin">Admin Login</a> </div>
-        </header>
-        <h1>WELCOME!</h1>
-        <div class="login-boxes">
-            <div class="login-box">
-                <h2> <a href="/ilogin"> Influencer Login page</a></h2>
-            </div>
-            <div class="login-box">
-                <h2> <a href="/slogin"> Sponsors Login page</a></h2>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#how-it-works" class="nav-link">How It Works</a>
+                <a href="#stats" class="nav-link">Stats</a>
+                <a href="/alogin" class="admin-link">
+                    <i class="fas fa-user-shield"></i> Admin
+                </a>
             </div>
         </div>
-    </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-background">
+            <div class="floating-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+                <div class="shape shape-3"></div>
+            </div>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">
+                Connect <span class="gradient-text">Brands</span> with 
+                <span class="gradient-text">Influencers</span>
+            </h1>
+            <p class="hero-subtitle">
+                The ultimate platform for seamless influencer marketing collaborations. 
+                Find your perfect match, create campaigns, and grow your brand.
+            </p>
+            <div class="hero-buttons">
+                <a href="/ilogin" class="btn btn-primary">
+                    <i class="fas fa-star"></i>
+                    Join as Influencer
+                </a>
+                <a href="/slogin" class="btn btn-secondary">
+                    <i class="fas fa-rocket"></i>
+                    Start as Brand
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose Promotify?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>Smart Matching</h3>
+                    <p>Advanced algorithms to find the perfect influencer-brand partnerships based on audience, niche, and values.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Real-time Analytics</h3>
+                    <p>Track campaign performance with detailed insights and metrics to optimize your marketing strategy.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Secure Platform</h3>
+                    <p>Enterprise-grade security ensuring safe transactions and data protection for all users.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>Easy Collaboration</h3>
+                    <p>Streamlined workflow for campaign creation, application management, and content approval.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Create Account</h3>
+                        <p>Sign up as an influencer or brand and complete your profile</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Discover & Connect</h3>
+                        <p>Browse campaigns or influencers that match your criteria</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Collaborate</h3>
+                        <p>Apply to campaigns or approve applications to start working together</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Grow Together</h3>
+                        <p>Track results and build long-lasting partnerships</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section id="stats" class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">1000+</div>
+                    <div class="stat-label">Active Influencers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Brands Trust Us</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">2500+</div>
+                    <div class="stat-label">Successful Campaigns</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">95%</div>
+                    <div class="stat-label">Satisfaction Rate</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <h2>Ready to Start Your Journey?</h2>
+            <p>Join thousands of successful influencers and brands already using Promotify</p>
+            <div class="cta-buttons">
+                <a href="/ireg" class="btn btn-primary">Register as Influencer</a>
+                <a href="/sreg" class="btn btn-secondary">Register as Brand</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify">
+                    <span class="logo-text">Promotify</span>
+                </div>
+                <div class="footer-text">
+                    <p>&copy; 2025 Promotify. All rights reserved.</p>
+                    <p>Connecting brands with influencers worldwide.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Animate stats on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.stat-item, .feature-card, .step').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
 </body>
 </html>

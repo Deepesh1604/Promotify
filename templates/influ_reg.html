@@ -3,35 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Influencer Sign Up Page</title>
+    <title>Influencer Registration - Promotify</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ireg.css') }}">
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify Logo">
-        </div>
-    </header>
-    <div class="container">
-        <h2>Influencer Sign Up</h2>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        <form id="signupForm" action="{{ url_for('influ_reg') }}" method="POST">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="password" name="password" placeholder="Create Password" required>
-            <input type="text" name="instagram" placeholder="Instagram">
-            <input type="text" name="linkedin" placeholder="LinkedIn">
-            <input type="text" name="twitter" placeholder="Twitter">
-            <input type="text" name="youtube" placeholder="YouTube">
-            <button type="submit">Sign Up</button>
-        </form>
-        <p>Already have an account? <a href="{{ url_for('influ_log') }}">Log in</a></p>
+    <div class="background">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
     </div>
+    
+    <div class="registration-container">
+        <div class="registration-header">
+            <a href="/ilogin" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Login</span>
+            </a>
+            <div class="logo">
+                <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify">
+                <span class="logo-text">Promotify</span>
+            </div>
+        </div>
+        
+        <div class="registration-card">
+            <div class="card-header">
+                <h1>Join as Creator</h1>
+                <p>Start your influencer journey and connect with amazing brands</p>
+            </div>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="alert-container">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }}"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <form id="signupForm" action="{{ url_for('influ_reg') }}" method="POST" class="registration-form">
+                <div class="form-section">
+                    <h3><i class="fas fa-user"></i> Personal Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="username">Creator Username</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-at"></i>
+                                <input type="text" id="username" name="username" placeholder="Choose a unique handle" required maxlength="15">
+                            </div>
+                            <span class="input-hint">3-15 characters, will be your public handle</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="password" name="password" placeholder="Create a strong password" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('password', 'toggle-icon-1')">
+                                <i class="fas fa-eye" id="toggle-icon-1"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strength-fill"></div>
+                            </div>
+                            <span class="strength-text" id="strength-text">Password strength</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3><i class="fas fa-share-alt"></i> Social Media Handles</h3>
+                    <p class="section-subtitle">Add your social media accounts to showcase your reach</p>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="instagram">Instagram</label>
+                            <div class="input-wrapper">
+                                <i class="fab fa-instagram"></i>
+                                <input type="text" id="instagram" name="instagram" placeholder="@your_instagram">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="youtube">YouTube</label>
+                            <div class="input-wrapper">
+                                <i class="fab fa-youtube"></i>
+                                <input type="text" id="youtube" name="youtube" placeholder="Your Channel Name">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="twitter">Twitter/X</label>
+                            <div class="input-wrapper">
+                                <i class="fab fa-twitter"></i>
+                                <input type="text" id="twitter" name="twitter" placeholder="@your_twitter">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="linkedin">LinkedIn</label>
+                            <div class="input-wrapper">
+                                <i class="fab fa-linkedin"></i>
+                                <input type="text" id="linkedin" name="linkedin" placeholder="Your LinkedIn Profile">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="terms-section">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="terms" required>
+                        <span class="checkmark"></span>
+                        I agree to the <a href="#" class="terms-link">Terms of Service</a> and <a href="#" class="terms-link">Privacy Policy</a>
+                    </label>
+                </div>
+                
+                <button type="submit" class="register-btn" id="register-btn" disabled>
+                    <span>Start My Creator Journey</span>
+                    <i class="fas fa-rocket"></i>
+                </button>
+            </form>
+            
+            <div class="login-section">
+                <p>Already part of our community?</p>
+                <a href="{{ url_for('influ_log') }}" class="login-link">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign In Instead
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(iconId);
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Password strength checker
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            const strengthFill = document.getElementById('strength-fill');
+            const strengthText = document.getElementById('strength-text');
+            
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+            
+            const strengthLevels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
+            const strengthColors = ['#dc2626', '#ea580c', '#d97706', '#059669', '#047857'];
+            
+            if (password.length === 0) {
+                strengthFill.style.width = '0%';
+                strengthText.textContent = 'Password strength';
+                strengthText.style.color = '#a1a1aa';
+            } else {
+                const percentage = (strength / 5) * 100;
+                strengthFill.style.width = percentage + '%';
+                strengthFill.style.backgroundColor = strengthColors[strength - 1] || strengthColors[0];
+                strengthText.textContent = strengthLevels[strength - 1] || strengthLevels[0];
+                strengthText.style.color = strengthColors[strength - 1] || strengthColors[0];
+            }
+        }
+
+        // Social media handle formatting
+        function formatSocialHandle(input, platform) {
+            let value = input.value.trim();
+            
+            switch(platform) {
+                case 'instagram':
+                case 'twitter':
+                    if (value && !value.startsWith('@')) {
+                        value = '@' + value.replace('@', '');
+                    }
+                    break;
+            }
+            
+            input.value = value;
+        }
+
+        // Form validation and enhancement
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('.registration-form');
+            const inputs = form.querySelectorAll('input');
+            const termsCheckbox = document.getElementById('terms');
+            const registerBtn = document.getElementById('register-btn');
+            const passwordInput = document.getElementById('password');
+            const usernameInput = document.getElementById('username');
+            const instagramInput = document.getElementById('instagram');
+            const twitterInput = document.getElementById('twitter');
+            
+            // Enhanced input interactions
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    if (this.value === '') {
+                        this.parentElement.classList.remove('focused');
+                    }
+                });
+                
+                if (input.value !== '') {
+                    input.parentElement.classList.add('focused');
+                }
+            });
+            
+            // Password strength checking
+            passwordInput.addEventListener('input', function() {
+                checkPasswordStrength(this.value);
+                checkFormValidity();
+            });
+            
+            // Username validation
+            usernameInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '');
+                checkFormValidity();
+            });
+            
+            // Social media handle formatting
+            instagramInput.addEventListener('blur', function() {
+                formatSocialHandle(this, 'instagram');
+            });
+            
+            twitterInput.addEventListener('blur', function() {
+                formatSocialHandle(this, 'twitter');
+            });
+            
+            // Terms checkbox validation
+            termsCheckbox.addEventListener('change', checkFormValidity);
+            
+            // Form validation
+            function checkFormValidity() {
+                const requiredInputs = form.querySelectorAll('input[required]');
+                const allRequiredValid = Array.from(requiredInputs).every(input => 
+                    input.type === 'checkbox' ? input.checked : input.value.trim() !== ''
+                );
+                const passwordStrong = passwordInput.value.length >= 8;
+                
+                if (allRequiredValid && passwordStrong) {
+                    registerBtn.disabled = false;
+                    registerBtn.classList.add('enabled');
+                } else {
+                    registerBtn.disabled = true;
+                    registerBtn.classList.remove('enabled');
+                }
+            }
+            
+            // Real-time validation for required fields
+            const requiredInputs = form.querySelectorAll('input[required]');
+            requiredInputs.forEach(input => {
+                input.addEventListener('input', checkFormValidity);
+                if (input.type === 'checkbox') {
+                    input.addEventListener('change', checkFormValidity);
+                }
+            });
+        });
+    </script>
 </body>
 </html>
