@@ -77,43 +77,11 @@
                 </div>
             </div>
         </header>
-        <!-- Statistics Summary Cards -->
-        <section class="summary-section">
-            <div class="summary-grid">
-                <div class="summary-card">
-                    <div class="summary-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="summary-number">1,247</div>
-                    <div class="summary-label">Total Users</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-icon">
-                        <i class="fas fa-bullhorn"></i>
-                    </div>
-                    <div class="summary-number">89</div>
-                    <div class="summary-label">Active Campaigns</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <div class="summary-number">456</div>
-                    <div class="summary-label">Influencers</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-icon">
-                        <i class="fas fa-building"></i>
-                    </div>
-                    <div class="summary-number">123</div>
-                    <div class="summary-label">Sponsors</div>
-                </div>
-            </div>
-        </section>
 
         <!-- Charts Section -->
         <section class="charts-section">
             <div class="charts-grid">
+                <!-- User Distribution -->
                 <div class="chart-card">
                     <div class="chart-header">
                         <div class="chart-title">
@@ -123,9 +91,6 @@
                         <div class="chart-actions">
                             <button class="chart-btn" title="Export Data">
                                 <i class="fas fa-download"></i>
-                            </button>
-                            <button class="chart-btn" title="Full Screen">
-                                <i class="fas fa-expand"></i>
                             </button>
                         </div>
                     </div>
@@ -146,6 +111,7 @@
                     </div>
                 </div>
 
+                <!-- Campaign Status -->
                 <div class="chart-card">
                     <div class="chart-header">
                         <div class="chart-title">
@@ -156,9 +122,6 @@
                             <button class="chart-btn" title="Export Data">
                                 <i class="fas fa-download"></i>
                             </button>
-                            <button class="chart-btn" title="Full Screen">
-                                <i class="fas fa-expand"></i>
-                            </button>
                         </div>
                     </div>
                     <div class="chart-content">
@@ -167,29 +130,23 @@
                     <div class="chart-footer">
                         <div class="chart-stats">
                             <div class="stat-item">
-                                <span class="stat-label">Total Campaigns</span>
-                                <span class="stat-value">127</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Success Rate</span>
-                                <span class="stat-value">92%</span>
+                                <span class="stat-label">Active</span>
+                                <span class="stat-value">Running</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="chart-card wide">
+                <!-- Top Industries -->
+                <div class="chart-card">
                     <div class="chart-header">
                         <div class="chart-title">
                             <i class="fas fa-industry"></i>
-                            <h3>Top Sponsor Industries</h3>
+                            <h3>Top Industries</h3>
                         </div>
                         <div class="chart-actions">
                             <button class="chart-btn" title="Export Data">
                                 <i class="fas fa-download"></i>
-                            </button>
-                            <button class="chart-btn" title="Full Screen">
-                                <i class="fas fa-expand"></i>
                             </button>
                         </div>
                     </div>
@@ -197,24 +154,144 @@
                         <canvas id="topIndustries"></canvas>
                     </div>
                     <div class="chart-footer">
-                        <div class="industry-insights">
-                            <div class="insight-item">
-                                <div class="insight-icon">
-                                    <i class="fas fa-trophy"></i>
-                                </div>
-                                <div class="insight-text">
-                                    <span class="insight-title">Leading Industry</span>
-                                    <span class="insight-value">Technology</span>
-                                </div>
+                        <div class="chart-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Leaders</span>
+                                <span class="stat-value">Tech</span>
                             </div>
-                            <div class="insight-item">
-                                <div class="insight-icon">
-                                    <i class="fas fa-trending-up"></i>
-                                </div>
-                                <div class="insight-text">
-                                    <span class="insight-title">Growth Rate</span>
-                                    <span class="insight-value">+15%</span>
-                                </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Budget Distribution -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-dollar-sign"></i>
+                            <h3>Budget Distribution</h3>
+                        </div>
+                        <div class="chart-actions">
+                            <button class="chart-btn" title="Export Data">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-content">
+                        <canvas id="budgetChart"></canvas>
+                    </div>
+                    <div class="chart-footer">
+                        <div class="chart-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Range</span>
+                                <span class="stat-value">Varied</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Growth -->
+                <div class="chart-card wide">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Monthly Growth</h3>
+                        </div>
+                        <div class="chart-actions">
+                            <button class="chart-btn" title="Export Data">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-content">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                    <div class="chart-footer">
+                        <div class="chart-legend">
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: rgb(54, 162, 235);"></span>
+                                <span class="legend-label">Influencers</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-color" style="background: rgb(255, 99, 132);"></span>
+                                <span class="legend-label">Sponsors</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Application Status -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-clipboard-list"></i>
+                            <h3>Applications</h3>
+                        </div>
+                        <div class="chart-actions">
+                            <button class="chart-btn" title="Export Data">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-content">
+                        <canvas id="applicationChart"></canvas>
+                    </div>
+                    <div class="chart-footer">
+                        <div class="chart-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Processing</span>
+                                <span class="stat-value">Live</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campaign Duration -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-clock"></i>
+                            <h3>Duration</h3>
+                        </div>
+                        <div class="chart-actions">
+                            <button class="chart-btn" title="Export Data">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-content">
+                        <canvas id="durationChart"></canvas>
+                    </div>
+                    <div class="chart-footer">
+                        <div class="chart-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Types</span>
+                                <span class="stat-value">Mixed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Platform Reach -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <i class="fas fa-share-alt"></i>
+                            <h3>Platform Reach</h3>
+                        </div>
+                        <div class="chart-actions">
+                            <button class="chart-btn" title="Export Data">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-content">
+                        <canvas id="platformChart"></canvas>
+                    </div>
+                    <div class="chart-footer">
+                        <div class="chart-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Social</span>
+                                <span class="stat-value">Multi</span>
                             </div>
                         </div>
                     </div>
@@ -237,10 +314,7 @@
             options: {
                 responsive: true,
                 plugins: {
-                    title: {
-                        display: true,
-                        text: 'User Distribution'
-                    }
+                    legend: { display: false }
                 }
             }
         });
@@ -252,7 +326,7 @@
             data: {
                 labels: campaignCountData.labels,
                 datasets: [{
-                    label: 'Number of Campaigns',
+                    label: 'Campaigns',
                     data: campaignCountData.data,
                     backgroundColor: [
                         'rgba(75, 192, 192, 0.6)',
@@ -264,15 +338,10 @@
             options: {
                 responsive: true,
                 scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+                    y: { beginAtZero: true }
                 },
                 plugins: {
-                    title: {
-                        display: true,
-                        text: 'Campaign Status'
-                    }
+                    legend: { display: false }
                 }
             }
         });
@@ -280,27 +349,159 @@
         // Top Industries Chart
         const topIndustriesData = JSON.parse('{{ top_industries | safe }}');
         new Chart(document.getElementById('topIndustries').getContext('2d'), {
-            type: 'horizontalBar',
+            type: 'bar',
             data: {
                 labels: topIndustriesData.labels,
                 datasets: [{
-                    label: 'Number of Sponsors',
+                    label: 'Sponsors',
                     data: topIndustriesData.data,
                     backgroundColor: 'rgba(153, 102, 255, 0.6)'
                 }]
             },
             options: {
                 responsive: true,
+                indexAxis: 'y',
                 scales: {
-                    x: {
-                        beginAtZero: true
+                    x: { beginAtZero: true }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Budget Distribution Chart
+        const budgetDistributionData = JSON.parse('{{ budget_distribution | safe }}');
+        new Chart(document.getElementById('budgetChart').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: budgetDistributionData.labels,
+                datasets: [{
+                    data: budgetDistributionData.data,
+                    backgroundColor: [
+                        'rgba(6, 182, 212, 0.6)',
+                        'rgba(16, 185, 129, 0.6)',
+                        'rgba(245, 158, 11, 0.6)',
+                        'rgba(139, 92, 246, 0.6)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Monthly Growth Chart
+        const monthlyRegistrationsData = JSON.parse('{{ monthly_registrations | safe }}');
+        new Chart(document.getElementById('growthChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: monthlyRegistrationsData.labels,
+                datasets: [{
+                    label: 'Influencers',
+                    data: monthlyRegistrationsData.influencer_data,
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                    fill: true
+                }, {
+                    label: 'Sponsors',
+                    data: monthlyRegistrationsData.sponsor_data,
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Application Status Chart
+        const applicationStatusData = JSON.parse('{{ application_status | safe }}');
+        new Chart(document.getElementById('applicationChart').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: applicationStatusData.labels,
+                datasets: [{
+                    data: applicationStatusData.data,
+                    backgroundColor: [
+                        'rgba(245, 158, 11, 0.6)',
+                        'rgba(16, 185, 129, 0.6)',
+                        'rgba(239, 68, 68, 0.6)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Campaign Duration Chart
+        const campaignDurationData = JSON.parse('{{ campaign_duration | safe }}');
+        new Chart(document.getElementById('durationChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: campaignDurationData.labels,
+                datasets: [{
+                    label: 'Campaigns',
+                    data: campaignDurationData.data,
+                    backgroundColor: [
+                        'rgba(6, 182, 212, 0.6)',
+                        'rgba(16, 185, 129, 0.6)',
+                        'rgba(245, 158, 11, 0.6)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // Platform Reach Chart
+        const influencerPlatformsData = JSON.parse('{{ influencer_platforms | safe }}');
+        new Chart(document.getElementById('platformChart').getContext('2d'), {
+            type: 'radar',
+            data: {
+                labels: influencerPlatformsData.labels,
+                datasets: [{
+                    label: 'Active Users',
+                    data: influencerPlatformsData.data,
+                    backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                    borderColor: 'rgb(79, 70, 229)',
+                    pointBackgroundColor: 'rgb(79, 70, 229)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgb(79, 70, 229)'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        ticks: { display: false }
                     }
                 },
                 plugins: {
-                    title: {
-                        display: true,
-                        text: 'Top 5 Sponsor Industries'
-                    }
+                    legend: { display: false }
                 }
             }
         });

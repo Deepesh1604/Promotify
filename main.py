@@ -410,16 +410,118 @@ def get_top_industries():
         'data': [count for _, count in top_industries]
     }
 
+def get_campaign_budget_distribution():
+    # Get budget ranges
+    low_budget = Campaign.query.filter(Campaign.budget < 10000).count()
+    mid_budget = Campaign.query.filter(Campaign.budget >= 10000, Campaign.budget < 50000).count()
+    high_budget = Campaign.query.filter(Campaign.budget >= 50000, Campaign.budget < 100000).count()
+    premium_budget = Campaign.query.filter(Campaign.budget >= 100000).count()
+    
+    return {
+        'labels': ['< $10K', '$10K - $50K', '$50K - $100K', '$100K+'],
+        'data': [low_budget, mid_budget, high_budget, premium_budget]
+    }
+
+def get_monthly_registrations():
+    # Get user registrations by month for the last 6 months
+    months = []
+    influencer_data = []
+    sponsor_data = []
+    
+    for i in range(5, -1, -1):
+        date = datetime.utcnow() - timedelta(days=30*i)
+        month_start = date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        if i > 0:
+            next_month = (date.replace(day=28) + timedelta(days=4)).replace(day=1)
+        else:
+            next_month = datetime.utcnow()
+        
+        month_name = month_start.strftime('%b %Y')
+        months.append(month_name)
+        
+        # Count influencers registered in this month
+        inf_count = Influencer.query.filter(
+            Influencer.date_joined >= month_start,
+            Influencer.date_joined < next_month
+        ).count()
+        
+        # Count sponsors registered in this month
+        spon_count = Sponsor.query.filter(
+            Sponsor.date_joined >= month_start,
+            Sponsor.date_joined < next_month
+        ).count()
+        
+        influencer_data.append(inf_count)
+        sponsor_data.append(spon_count)
+    
+    return {
+        'labels': months,
+        'influencer_data': influencer_data,
+        'sponsor_data': sponsor_data
+    }
+
+def get_application_status_distribution():
+    pending_apps = Application.query.filter_by(status='pending').count()
+    accepted_apps = Application.query.filter_by(status='accepted').count()
+    rejected_apps = Application.query.filter_by(status='rejected').count()
+    
+    return {
+        'labels': ['Pending', 'Accepted', 'Rejected'],
+        'data': [pending_apps, accepted_apps, rejected_apps]
+    }
+
+def get_campaign_duration_analysis():
+    # Analyze campaign durations
+    short_campaigns = Campaign.query.filter(
+        func.julianday(Campaign.end_date) - func.julianday(Campaign.start_date) <= 30
+    ).count()
+    
+    medium_campaigns = Campaign.query.filter(
+        func.julianday(Campaign.end_date) - func.julianday(Campaign.start_date) > 30,
+        func.julianday(Campaign.end_date) - func.julianday(Campaign.start_date) <= 90
+    ).count()
+    
+    long_campaigns = Campaign.query.filter(
+        func.julianday(Campaign.end_date) - func.julianday(Campaign.start_date) > 90
+    ).count()
+    
+    return {
+        'labels': ['Short (≤30 days)', 'Medium (31-90 days)', 'Long (>90 days)'],
+        'data': [short_campaigns, medium_campaigns, long_campaigns]
+    }
+
+def get_influencer_engagement_stats():
+    # Get stats about influencer social media presence
+    instagram_users = Influencer.query.filter(Influencer.instagram.isnot(None), Influencer.instagram != '').count()
+    twitter_users = Influencer.query.filter(Influencer.twitter.isnot(None), Influencer.twitter != '').count()
+    youtube_users = Influencer.query.filter(Influencer.youtube.isnot(None), Influencer.youtube != '').count()
+    linkedin_users = Influencer.query.filter(Influencer.linkedin.isnot(None), Influencer.linkedin != '').count()
+    
+    return {
+        'labels': ['Instagram', 'Twitter', 'YouTube', 'LinkedIn'],
+        'data': [instagram_users, twitter_users, youtube_users, linkedin_users]
+    }
+
 @app.route('/astats')
 def admin_stats():
     user_distribution = get_user_distribution()
     campaign_count = get_campaign_count()
     top_industries = get_top_industries()
+    budget_distribution = get_campaign_budget_distribution()
+    monthly_registrations = get_monthly_registrations()
+    application_status = get_application_status_distribution()
+    campaign_duration = get_campaign_duration_analysis()
+    influencer_platforms = get_influencer_engagement_stats()
 
     return render_template('astats.html',
                            user_distribution=json.dumps(user_distribution),
                            campaign_count=json.dumps(campaign_count),
-                           top_industries=json.dumps(top_industries))
+                           top_industries=json.dumps(top_industries),
+                           budget_distribution=json.dumps(budget_distribution),
+                           monthly_registrations=json.dumps(monthly_registrations),
+                           application_status=json.dumps(application_status),
+                           campaign_duration=json.dumps(campaign_duration),
+                           influencer_platforms=json.dumps(influencer_platforms))
     
 @app.route('/istats')
 def influ_stats():
@@ -643,4 +745,4 @@ def ifind():
 
 
 if __name__ == "__main__":
-    app.run(debug=True , port = 5003)
+    app.run(debug=True , port = 5004)
