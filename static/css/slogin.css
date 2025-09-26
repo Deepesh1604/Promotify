@@ -6,21 +6,23 @@
 }
 
 :root {
-    --primary-color: #6366f1;
-    --primary-dark: #4f46e5;
-    --secondary-color: #f59e0b;
-    --background-dark: #0f0f23;
-    --surface-dark: #1a1a2e;
-    --surface-light: rgba(255, 255, 255, 0.05);
-    --text-primary: #ffffff;
-    --text-secondary: #a1a1aa;
-    --accent-cyan: #06d6a0;
-    --accent-pink: #ef476f;
-    --gradient-primary: linear-gradient(135deg, var(--primary-color), var(--accent-cyan));
+    --primary-color: #10b981;
+    --primary-dark: #059669;
+    --sponsor-color: #10b981;
+    --sponsor-dark: #059669;
+    --sponsor-accent: #047857;
+    --background-dark: #0f172a;
+    --surface-dark: #1e293b;
+    --surface-light: rgba(255, 255, 255, 0.08);
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --accent-green: #10b981;
+    --accent-teal: #14b8a6;
+    --gradient-primary: linear-gradient(135deg, var(--sponsor-color), var(--accent-teal));
     --border-radius: 12px;
-    --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    --shadow-heavy: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    --shadow-heavy: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
 }
 
 body {
@@ -46,8 +48,8 @@ body {
 .shape {
     position: absolute;
     border-radius: 50%;
-    background: linear-gradient(45deg, var(--primary-color), var(--accent-cyan));
-    opacity: 0.1;
+    background: linear-gradient(45deg, var(--sponsor-color), var(--accent-teal));
+    opacity: 0.06;
     animation: float 8s ease-in-out infinite;
 }
 
@@ -134,9 +136,9 @@ body {
     background: var(--surface-light);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--border-radius);
-    padding: 40px;
+    padding: 30px;
     width: 100%;
-    max-width: 400px;
+    max-width: 350px;
     backdrop-filter: blur(20px);
     box-shadow: var(--shadow-heavy);
     animation: slideInUp 0.6s ease-out;
@@ -155,13 +157,13 @@ body {
 
 .card-header {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
 }
 
 .card-header h1 {
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     background: var(--gradient-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -190,15 +192,15 @@ body {
 }
 
 .alert-success {
-    background: rgba(6, 214, 160, 0.1);
-    border: 1px solid rgba(6, 214, 160, 0.3);
-    color: var(--accent-cyan);
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: var(--sponsor-color);
 }
 
 .alert-error {
-    background: rgba(239, 71, 111, 0.1);
-    border: 1px solid rgba(239, 71, 111, 0.3);
-    color: var(--accent-pink);
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
 }
 
 @keyframes slideIn {
@@ -216,7 +218,7 @@ body {
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 18px;
 }
 
 .form-group {
@@ -247,19 +249,19 @@ body {
 
 .input-wrapper input {
     width: 100%;
-    padding: 14px 16px 14px 45px;
+    padding: 12px 14px 12px 40px;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     color: var(--text-primary);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     transition: all 0.3s ease;
 }
 
 .input-wrapper input:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    border-color: var(--sponsor-color);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
     background: rgba(255, 255, 255, 0.08);
 }
 
@@ -274,13 +276,20 @@ body {
 .toggle-password {
     position: absolute;
     right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
     background: none;
     border: none;
     color: var(--text-secondary);
     cursor: pointer;
-    padding: 4px;
+    padding: 2px;
     transition: color 0.3s ease;
     z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
 }
 
 .toggle-password:hover {
@@ -292,15 +301,15 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     width: 100%;
-    padding: 14px;
+    padding: 12px;
     background: var(--gradient-primary);
     border: none;
     border-radius: 8px;
     color: white;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.95rem;
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
@@ -375,17 +384,17 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    color: var(--primary-color);
+    color: var(--sponsor-color);
     text-decoration: none;
     font-weight: 600;
     padding: 10px 20px;
-    border: 1px solid var(--primary-color);
+    border: 1px solid var(--sponsor-color);
     border-radius: 6px;
     transition: all 0.3s ease;
 }
 
 .signup-link:hover {
-    background: var(--primary-color);
+    background: var(--sponsor-color);
     color: white;
     transform: translateY(-2px);
 }
