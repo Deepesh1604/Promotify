@@ -31,7 +31,7 @@ Designed with user-friendliness in mind, **Promotify** makes it effortless for S
 
 ## 🗂️ DB Schema Design
 
-The database model includes tables for **Sponsors**, **Influencers**, **Campaigns**, and **Applications**.  
+The database model includes tables for **Sponsors**, **Influencers**, **Campaigns**, and **Applications**
 - **Sponsors** and **Influencers** are defined by `id`, `username`, `email`, `password`, and additional profile information.  
 - **Campaigns** encompass details such as `name`, `description`, `dates`, and `budget`.  
 - **Applications** link Influencers to Campaigns with a `status` field. 
@@ -62,6 +62,6 @@ In the root folder, we have the following key components:
 - **Admin dashboard** for overseeing platform activities
 - **Search functionality** for campaigns and users
 - **Analytics and statistics** for user growth and campaign performance
-- **CRUD operations** for campaigns and user profiles
+- **CRUD operations** for campaigns and user profiles.
 
 The application implements proper front-end and back-end validation for user inputs. It features separate login forms for **Sponsors**, **Influencers**, and **Admins**, with secure role-based access control. The platform includes comprehensive CRUD features for **Campaigns** and **Applications**. Sponsors can review and manage applications, while Admins have the ability to oversee all platform activities, including user management and campaign moderation.
