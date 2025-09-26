@@ -3,95 +3,336 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Stats</title>
+        <title>Influencer Stats - Promotify</title>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/istats.css') }}">
     </head>
     <body>
+        <!-- Sidebar -->
         <div class="sidebar">
-            <header>
+            <div class="sidebar-header">
                 <div class="logo">
-                    <img src="../static/images/promotify.png" alt="">
+                    <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify">
+                    <span class="logo-text">Promotify</span>
                 </div>
-            </header>
-        <nav>
-            <ul>
-                <li><a href="/idash">Profile</a></li>
-                <li><a href="/ifind">Find</a></li>
-                <li><a href="#" class="active">Stats</a></li>
-                <li><a href="#">Logout</a></li>
-            </ul>
-        </nav>
-    </div>
-
-    <div class="main-content">
-        <header>
-            <h1>Influencer's Dashboard</h1>
-            <div class="user-info">
-                <span>Welcome User_01</span>
-                <button class="logout-btn">Logout</button>
-            </div>
-        </header>
-
-        <div class="stats-section">
-            <h2>Statistics</h2>
-            <div class="charts-container">
-                <div class="chart">
-                    <canvas id="lineChart"></canvas>
-                </div>
-                <div class="chart">
-                    <canvas id="doughnutChart"></canvas>
+                <div class="influencer-badge">
+                    <i class="fas fa-star"></i>
+                    <span>Influencer</span>
                 </div>
             </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item">
+                        <a href="{{ url_for('influ_dash') }}" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('ifind') }}" class="nav-link">
+                            <i class="fas fa-search"></i>
+                            Find Campaigns
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="{{ url_for('influ_stats') }}" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            Statistics
+                        </a>
+                    </li>
+                    <li class="nav-item logout">
+                        <a href="{{ url_for('influ_logout') }}" class="nav-link">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
-    </div>
 
-    <script>
-        // Line chart
-        const ctxLine = document.getElementById('lineChart').getContext('2d');
-        const lineChart = new Chart(ctxLine, {
-            type: 'line',
-            data: {
-                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-                datasets: [{
-                    label: 'Earnings',
-                    data: [1200, 1900, 3000, 5000, 2000, 3000, 4500],
-                    borderColor: '#1db954',
-                    backgroundColor: 'rgba(29, 185, 84, 0.2)',
-                    borderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-header">
+                <div class="header-left">
+                    <h1>Analytics & Statistics</h1>
+                    <p class="header-subtitle">Track your performance and campaign insights</p>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        {{ session.get('username', 'U')[0].upper() }}
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name">{{ session.get('username', 'User') }}</div>
+                        <div class="user-role">Influencer</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- Overview Stats -->
+                <div class="content-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-chart-line"></i>
+                        Performance Overview
+                    </h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon earnings">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Total Earnings</h3>
+                                <div class="stat-number">$12,450</div>
+                                <div class="stat-label">This month</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon campaigns">
+                                <i class="fas fa-bullhorn"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Active Campaigns</h3>
+                                <div class="stat-number">8</div>
+                                <div class="stat-label">Currently running</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon engagement">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Engagement Rate</h3>
+                                <div class="stat-number">4.8%</div>
+                                <div class="stat-label">Average</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon reach">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Total Reach</h3>
+                                <div class="stat-number">125K</div>
+                                <div class="stat-label">Last 30 days</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-section">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>
+                                <i class="fas fa-chart-line"></i>
+                                Earnings Trend
+                            </h3>
+                            <div class="chart-controls">
+                                <select class="time-filter">
+                                    <option value="7d">Last 7 days</option>
+                                    <option value="30d" selected>Last 30 days</option>
+                                    <option value="90d">Last 3 months</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="lineChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>
+                                <i class="fas fa-chart-pie"></i>
+                                Campaign Performance
+                            </h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="doughnutChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Stats -->
+                <div class="content-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-trophy"></i>
+                        Recent Achievements
+                    </h2>
+                    <div class="achievements-grid">
+                        <div class="achievement-card">
+                            <div class="achievement-icon">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <div class="achievement-content">
+                                <h4>Top Performer</h4>
+                                <p>Ranked #1 in beauty category this month</p>
+                                <span class="achievement-date">2 days ago</span>
+                            </div>
+                        </div>
+                        <div class="achievement-card">
+                            <div class="achievement-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="achievement-content">
+                                <h4>High Engagement</h4>
+                                <p>Achieved 6.2% engagement rate on recent post</p>
+                                <span class="achievement-date">5 days ago</span>
+                            </div>
+                        </div>
+                        <div class="achievement-card">
+                            <div class="achievement-icon">
+                                <i class="fas fa-target"></i>
+                            </div>
+                            <div class="achievement-content">
+                                <h4>Goal Reached</h4>
+                                <p>Completed 10 successful campaigns</p>
+                                <span class="achievement-date">1 week ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Background Animation -->
+        <div class="background">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+
+        <!-- JavaScript -->
+        <script>
+            // Chart.js default settings
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.elements.line.borderWidth = 3;
+            Chart.defaults.elements.point.radius = 6;
+            Chart.defaults.elements.point.hoverRadius = 8;
+
+            // Line chart
+            const ctxLine = document.getElementById('lineChart').getContext('2d');
+            const lineChart = new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                    datasets: [{
+                        label: 'Earnings ($)',
+                        data: [1200, 1900, 3000, 5000, 2000, 3000, 4500],
+                        borderColor: '#f97316',
+                        backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#f8fafc',
+                                font: {
+                                    weight: '600'
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(249, 115, 22, 0.1)',
+                                borderColor: 'rgba(249, 115, 22, 0.2)'
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(249, 115, 22, 0.1)',
+                                borderColor: 'rgba(249, 115, 22, 0.2)'
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                callback: function(value) {
+                                    return '$' + value;
+                                }
+                            }
+                        }
                     }
                 }
-            }
-        });
+            });
 
-        // Doughnut chart
-        const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
-        const doughnutChart = new Chart(ctxDoughnut, {
-            type: 'doughnut',
-            data: {
-                labels: ['Campaign 1', 'Campaign 2', 'Campaign 3', 'Campaign 4'],
-                datasets: [{
-                    data: [300, 50, 100, 150],
-                    backgroundColor: [
-                        '#1db954',
-                        '#ff5252',
-                        '#ffcd56',
-                        '#36a2eb'
-                    ],
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true
+            // Doughnut chart
+            const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
+            const doughnutChart = new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Beauty Brands', 'Fashion', 'Lifestyle', 'Tech Products'],
+                    datasets: [{
+                        data: [35, 25, 25, 15],
+                        backgroundColor: [
+                            '#f97316',
+                            '#ea580c',
+                            '#fb923c',
+                            '#fdba74'
+                        ],
+                        borderColor: [
+                            '#f97316',
+                            '#ea580c', 
+                            '#fb923c',
+                            '#fdba74'
+                        ],
+                        borderWidth: 2,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: {
+                                color: '#f8fafc',
+                                font: {
+                                    weight: '500'
+                                },
+                                padding: 20
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Mobile sidebar toggle
+            function toggleSidebar() {
+                const sidebar = document.querySelector('.sidebar');
+                sidebar.classList.toggle('active');
             }
-        });
-    </script>
+
+            // Time filter functionality
+            document.querySelector('.time-filter').addEventListener('change', function(e) {
+                // Update chart data based on selection
+                console.log('Time filter changed:', e.target.value);
+            });
+
+            // Initialize page
+            document.addEventListener('DOMContentLoaded', function() {
+                // Add any initialization code here
+            });
+        </script>
 </body>
 </html>

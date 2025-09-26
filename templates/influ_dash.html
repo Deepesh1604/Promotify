@@ -3,80 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Influencer Dashboard</title>
+    <title>Influencer Dashboard - Promotify</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/idash.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Background -->
+    <div class="background">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <!-- Sidebar -->
     <div class="sidebar">
-        <header>
+        <div class="sidebar-header">
             <div class="logo">
-                <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify Logo">
+                <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify">
+                <span class="logo-text">Promotify</span>
             </div>
-        </header>
-        <nav>
+            <div class="influencer-badge">
+                <i class="fas fa-star"></i>
+                <span>Influencer Portal</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
             <ul>
-                <li><a href="#" class="active">Profile</a></li>
-                <li><a href="{{ url_for('ifind') }}">Find</a></li>
-                <li><a href="{{ url_for('influ_stats') }}">Stats</a></li>
+                <li class="nav-item active">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('ifind') }}" class="nav-link">
+                        <i class="fas fa-search"></i>
+                        <span>Find Campaigns</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('influ_stats') }}" class="nav-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item logout">
+                    <a href="{{ url_for('influ_logout') }}" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
             </ul>
         </nav>
     </div>
-    <div class="main-content">
-        <header>
-            <h1>Influencer's Dashboard</h1>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Content Header -->
+        <div class="content-header">
+            <div class="header-left">
+                <h1>Influencer Dashboard</h1>
+                <p class="header-subtitle">Manage your campaigns and track your performance</p>
+            </div>
             <div class="user-info">
-                <span>Welcome {{ influencer.username if influencer else 'Influencer' }}</span>
-                <a href="{{ url_for('influ_logout') }}" class="logout-btn">Logout</a>
-            </div>
-        </header>
-        <div class="profile-section">
-            <div class="profile-pic"></div>
-            <div class="profile-info">
-                <p>Rating: {{ influencer.rating if influencer and influencer.rating else 'N/A' }}</p>
-                <p>Earnings this month: ${{ influencer.earnings if influencer and influencer.earnings else '0' }}</p>
+                <div class="user-avatar">
+                    {{ influencer.username[0].upper() if influencer and influencer.username else 'I' }}
+                </div>
+                <div class="user-details">
+                    <span class="user-name">{{ influencer.username if influencer else 'Influencer' }}</span>
+                    <span class="user-role">Content Creator</span>
+                </div>
             </div>
         </div>
-        <div class="campaigns-section">
-            <h2>Available Campaigns</h2>
-            {% if active_campaigns %}
-                {% for campaign in active_campaigns %}
-                <div class="campaign">
-                    <span>{{ campaign.name }} | Sponsor: {{ campaign.sponsor.username }}</span>
-                    <a href="{{ url_for('influ_dash', campaign_id=campaign.id) }}" class="view-btn">View Details</a>
-                    <form action="{{ url_for('apply_campaign', campaign_id=campaign.id) }}" method="post" style="display: inline;">
-                        <button type="submit" class="apply-btn">Apply</button>
-                    </form>
+        <div class="content">
+            <!-- Profile Stats Section -->
+            <div class="profile-section content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-user-circle"></i>
+                    Profile Overview
+                </h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon rating">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Rating</h3>
+                            <p class="stat-number">{{ "%.1f"|format(influencer.rating|float) if influencer and influencer.rating else '0.0' }}</p>
+                            <span class="stat-label">Out of 5.0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon earnings">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Monthly Earnings</h3>
+                            <p class="stat-number">${{ "{:,.0f}".format(influencer.earnings|float) if influencer and influencer.earnings else '0' }}</p>
+                            <span class="stat-label">This Month</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon campaigns">
+                            <i class="fas fa-bullhorn"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Active Campaigns</h3>
+                            <p class="stat-number">{{ influencer.campaigns|length if influencer and influencer.campaigns else 0 }}</p>
+                            <span class="stat-label">Currently Running</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon available">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Available Opportunities</h3>
+                            <p class="stat-number">{{ active_campaigns|length if active_campaigns else 0 }}</p>
+                            <span class="stat-label">Ready to Apply</span>
+                        </div>
+                    </div>
                 </div>
-                {% endfor %}
-            {% else %}
-                <p>No available campaigns at the moment.</p>
-            {% endif %}
-        </div>
-        {% if selected_campaign %}
-        <div class="campaign-details">
-            <h2>Campaign Details</h2>
-            <h3>{{ selected_campaign.name }}</h3>
-            <p>Sponsor: {{ selected_campaign.sponsor.username }}</p>
-            <p>Description: {{ selected_campaign.description or 'No description available.' }}</p>
-            <!-- Add more details as needed -->
-            <form action="{{ url_for('apply_campaign', campaign_id=selected_campaign.id) }}" method="post">
-                <button type="submit" class="apply-btn">Apply for this Campaign</button>
-            </form>
-        </div>
-        {% endif %}
-        <div class="requests-section">
-            <h2>Your Active Campaigns</h2>
-            {% if influencer.campaigns %}
-                {% for campaign in influencer.campaigns %}
-                <div class="campaign">
-                    <span>{{ campaign.name }} | Sponsor: {{ campaign.sponsor.username }}</span>
-                    <a href="{{ url_for('influ_dash', campaign_id=campaign.id) }}" class="view-btn">View Details</a>
+            </div>
+
+            <!-- Available Campaigns Section -->
+            <div class="campaigns-section content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-bullhorn"></i>
+                    Available Campaigns
+                </h2>
+                
+                {% if active_campaigns %}
+                    <div class="campaigns-grid">
+                        {% for campaign in active_campaigns %}
+                        <div class="campaign-card">
+                            <div class="campaign-header">
+                                <div class="campaign-name">{{ campaign.name }}</div>
+                                <div class="campaign-budget">${{ "{:,.0f}".format(campaign.budget) }}</div>
+                            </div>
+                            <div class="campaign-sponsor">
+                                <i class="fas fa-building"></i>
+                                {{ campaign.sponsor.username }}
+                            </div>
+                            <p class="campaign-description">{{ campaign.description[:100] + '...' if campaign.description and campaign.description|length > 100 else (campaign.description or 'No description available.') }}</p>
+                            <div class="campaign-actions">
+                                <a href="{{ url_for('influ_dash', campaign_id=campaign.id) }}" class="btn btn-secondary">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                                <form action="{{ url_for('apply_campaign', campaign_id=campaign.id) }}" method="post" style="display: inline;">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane"></i> Apply
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-bullhorn"></i>
+                        <p>No available campaigns at the moment.</p>
+                        <a href="{{ url_for('ifind') }}" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                            Explore Opportunities
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if selected_campaign %}
+            <div class="details-section">
+                <h2 class="details-title">
+                    <i class="fas fa-info-circle"></i>
+                    Campaign Details: {{ selected_campaign.name }}
+                </h2>
+                <div class="details-content">
+                    <p><strong>Sponsor:</strong> {{ selected_campaign.sponsor.username }}</p>
+                    <p><strong>Budget:</strong> ${{ "{:,.2f}".format(selected_campaign.budget) }}</p>
+                    <p><strong>Description:</strong> {{ selected_campaign.description or 'No description available.' }}</p>
+                    <p><strong>Duration:</strong> {{ selected_campaign.start_date }} to {{ selected_campaign.end_date }}</p>
+                    
+                    <div class="action-buttons">
+                        <form action="{{ url_for('apply_campaign', campaign_id=selected_campaign.id) }}" method="post">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                Apply for this Campaign
+                            </button>
+                        </form>
+                    </div>
                 </div>
-                {% endfor %}
-            {% else %}
-                <p>You're not part of any active campaigns at the moment.</p>
+            </div>
             {% endif %}
+
+            <!-- Section Divider -->
+            <div class="section-divider"></div>
+
+            <!-- Your Active Campaigns Section -->
+            <div class="active-campaigns-section content-section">
+                <h2 class="section-title">
+                    <i class="fas fa-rocket"></i>
+                    Your Active Campaigns
+                </h2>
+                
+                {% if influencer.campaigns %}
+                    <div class="active-campaigns-grid">
+                        {% for campaign in influencer.campaigns %}
+                        <div class="active-campaign-card">
+                            <div class="campaign-info">
+                                <div class="campaign-name">{{ campaign.name }}</div>
+                                <div class="campaign-sponsor">
+                                    <i class="fas fa-building"></i> {{ campaign.sponsor.username }}
+                                </div>
+                            </div>
+                            <div class="campaign-status">
+                                <span class="status-badge active">Active</span>
+                            </div>
+                            <div class="campaign-actions">
+                                <a href="{{ url_for('influ_dash', campaign_id=campaign.id) }}" class="btn btn-primary">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-rocket"></i>
+                        <p>You're not part of any active campaigns at the moment.</p>
+                        <a href="{{ url_for('ifind') }}" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                            Find Campaigns
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
         </div>
-    </div>
+    </main>
 </body>
 </html>
