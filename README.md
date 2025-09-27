@@ -120,7 +120,7 @@ python wallet_test_data.py    # Add sample data
 
 ### Run Application
 ```bash
-python main.py
+python3 main.py
 ```
 Open browser: `http://localhost:5006`
 
