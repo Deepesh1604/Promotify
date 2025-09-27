@@ -274,7 +274,7 @@
                                 {% for filter in filter_options %}
                                     <input type="hidden" name="filter" value="{{ filter }}">
                                 {% endfor %}
-                                <button type="submit" class="remove-btn" onclick="return confirm('Are you sure you want to remove this campaign?');">
+                                <button type="submit" class="remove-btn" onclick="return confirm('⚠️ WARNING: Are you sure you want to permanently remove the campaign &quot;{{ campaign.name }}&quot;?\n\nThis action will:\n• Delete the campaign permanently\n• Remove all related applications\n• Cannot be undone\n\nClick OK to proceed or Cancel to abort.');">
                                     <i class="fas fa-trash-alt"></i>
                                     Remove
                                 </button>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Influencer Wallet - Promotify</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/iwallet.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="background">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify">
+                <span class="logo-text">Promotify</span>
+            </div>
+            <div class="influencer-badge">
+                <i class="fas fa-star"></i>
+                <span>Influencer</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="nav-item">
+                    <a href="{{ url_for('influ_dash') }}" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="{{ url_for('influencer_wallet') }}" class="nav-link">
+                        <i class="fas fa-wallet"></i>
+                        <span>Wallet</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('ifind') }}" class="nav-link">
+                        <i class="fas fa-search"></i>
+                        <span>Find Campaigns</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('influ_stats') }}" class="nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item logout">
+                    <a href="{{ url_for('influ_logout') }}" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Content Header -->
+        <header class="content-header">
+            <div class="header-left">
+                <h1><i class="fas fa-wallet"></i>Wallet Management</h1>
+                <p class="header-subtitle">Manage your earnings and bank account details</p>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-details">
+                    <span class="user-name">{{ influencer.username }}</span>
+                    <span class="user-role">Content Creator</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- Wallet Balance Section -->
+            <div class="wallet-balance-section">
+                <div class="balance-card">
+                    <div class="balance-header">
+                        <h2><i class="fas fa-coins"></i>Available Earnings</h2>
+                        <div class="balance-actions">
+                            <button class="btn btn-primary" onclick="openWithdrawModal()" 
+                                    {% if not influencer.bank_account %}disabled title="Please add bank details first"{% endif %}>
+                                <i class="fas fa-download"></i> Withdraw
+                            </button>
+                        </div>
+                    </div>
+                    <div class="balance-amount">
+                        <span class="currency">₹</span>
+                        <span class="amount">{{ "%.2f"|format(influencer.wallet_balance) }}</span>
+                    </div>
+                    <div class="balance-info">
+                        <p><i class="fas fa-info-circle"></i> Earnings from completed campaigns</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bank Details Section -->
+            <div class="bank-details-section">
+                <h3><i class="fas fa-university"></i>Bank Account Details</h3>
+                <div class="bank-card">
+                    <form action="{{ url_for('influencer_wallet') }}" method="POST">
+                        <input type="hidden" name="action" value="update_bank">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="bank_account">Bank Account Number</label>
+                                <input type="text" id="bank_account" name="bank_account" 
+                                       value="{{ influencer.bank_account or '' }}" 
+                                       placeholder="Enter your account number">
+                            </div>
+                            <div class="form-group">
+                                <label for="ifsc_code">IFSC Code</label>
+                                <input type="text" id="ifsc_code" name="ifsc_code" 
+                                       value="{{ influencer.ifsc_code or '' }}" 
+                                       placeholder="Enter IFSC code" maxlength="11">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Update Bank Details
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions-section">
+                <h3><i class="fas fa-bolt"></i>Quick Actions</h3>
+                <div class="action-cards">
+                    <div class="action-card" onclick="openWithdrawModal()">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <h4>Withdraw Earnings</h4>
+                        <p>Transfer to bank account</p>
+                    </div>
+                    <div class="action-card" onclick="location.href='{{ url_for('influ_dash') }}'">
+                        <i class="fas fa-tasks"></i>
+                        <h4>View Campaigns</h4>
+                        <p>Check active projects</p>
+                    </div>
+                    <div class="action-card" onclick="location.href='{{ url_for('ifind') }}'">
+                        <i class="fas fa-search-plus"></i>
+                        <h4>Find Campaigns</h4>
+                        <p>Discover new opportunities</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="transaction-history-section">
+                <h3><i class="fas fa-history"></i>Transaction History</h3>
+                {% if transactions %}
+                    <div class="transactions-list">
+                        {% for transaction in transactions %}
+                        <div class="transaction-item {{ transaction.transaction_type }}">
+                            <div class="transaction-icon">
+                                {% if transaction.transaction_type == 'credit' %}
+                                    <i class="fas fa-arrow-up text-success"></i>
+                                {% else %}
+                                    <i class="fas fa-arrow-down text-warning"></i>
+                                {% endif %}
+                            </div>
+                            <div class="transaction-details">
+                                <div class="transaction-description">{{ transaction.description }}</div>
+                                <div class="transaction-date">{{ transaction.created_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+                                {% if transaction.reference_id %}
+                                    <div class="transaction-ref">Ref: {{ transaction.reference_id }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="transaction-amount {{ transaction.transaction_type }}">
+                                {% if transaction.transaction_type == 'credit' %}
+                                    +₹{{ "%.2f"|format(transaction.amount) }}
+                                {% else %}
+                                    -₹{{ "%.2f"|format(transaction.amount) }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-receipt"></i>
+                        <p>No transactions yet. Complete campaigns to start earning!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <!-- Withdraw Modal -->
+    <div id="withdrawModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-money-bill-wave"></i> Withdraw Earnings</h2>
+                <span class="close" onclick="closeWithdrawModal()">&times;</span>
+            </div>
+            <form action="{{ url_for('influencer_wallet') }}" method="POST">
+                <input type="hidden" name="action" value="withdraw">
+                <div class="modal-body">
+                    <div class="withdrawal-info">
+                        <div class="balance-display">
+                            <span>Available Balance: </span>
+                            <strong>₹{{ "%.2f"|format(influencer.wallet_balance) }}</strong>
+                        </div>
+                        {% if influencer.bank_account %}
+                        <div class="bank-display">
+                            <i class="fas fa-university"></i>
+                            Account: ****{{ influencer.bank_account[-4:] if influencer.bank_account|length > 4 else influencer.bank_account }} 
+                            ({{ influencer.ifsc_code }})
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="withdraw_amount">Withdrawal Amount</label>
+                        <div class="amount-input">
+                            <span class="currency-symbol">₹</span>
+                            <input type="number" id="withdraw_amount" name="amount" placeholder="0.00" 
+                                   min="1" max="{{ influencer.wallet_balance }}" step="0.01" required>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-amounts">
+                        <span>Quick Select:</span>
+                        <button type="button" class="quick-amount" onclick="setWithdrawAmount(1000)">₹1,000</button>
+                        <button type="button" class="quick-amount" onclick="setWithdrawAmount(5000)">₹5,000</button>
+                        <button type="button" class="quick-amount" onclick="setWithdrawAmount({{ influencer.wallet_balance|int }})">All</button>
+                    </div>
+
+                    <div class="withdrawal-note">
+                        <p><i class="fas fa-info-circle"></i> Funds will be transferred to your registered bank account within 1-2 business days</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeWithdrawModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Withdraw Money
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openWithdrawModal() {
+            {% if not influencer.bank_account %}
+            alert('Please add your bank account details first.');
+            return;
+            {% endif %}
+            
+            {% if influencer.wallet_balance <= 0 %}
+            alert('No funds available for withdrawal.');
+            return;
+            {% endif %}
+            
+            document.getElementById('withdrawModal').style.display = 'block';
+        }
+
+        function closeWithdrawModal() {
+            document.getElementById('withdrawModal').style.display = 'none';
+        }
+
+        function setWithdrawAmount(amount) {
+            const maxAmount = {{ influencer.wallet_balance }};
+            const finalAmount = Math.min(amount, maxAmount);
+            document.getElementById('withdraw_amount').value = finalAmount;
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('withdrawModal');
+            if (event.target == modal) {
+                closeWithdrawModal();
+            }
+        }
+    </script>
+</body>
+</html>

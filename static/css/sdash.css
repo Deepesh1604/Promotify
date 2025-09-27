@@ -360,6 +360,17 @@ body {
     color: var(--sponsor-color);
 }
 
+.status-ongoing {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.status-pending {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+}
+
 .status-completed {
     background: rgba(107, 114, 128, 0.2);
     color: var(--text-secondary);
@@ -621,6 +632,119 @@ body {
     }
 }
 
+/* Ongoing Campaign Styles */
+.ongoing-card {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.08));
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.ongoing-card:hover {
+    border-color: #22c55e;
+    box-shadow: 0 8px 25px rgba(34, 197, 94, 0.15);
+}
+
+.influencer-count {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+
+.campaign-influencers {
+    margin: 15px 0;
+    padding: 15px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.campaign-influencers h4 {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.campaign-influencers h4 i {
+    color: #22c55e;
+    font-size: 0.8rem;
+}
+
+.influencers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.influencer-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.influencer-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.influencer-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.influencer-info i {
+    color: #22c55e;
+    font-size: 1.2rem;
+}
+
+.influencer-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.influencer-email {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.influencer-platforms {
+    display: flex;
+    gap: 6px;
+}
+
+.influencer-platforms i {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
+}
+
+.influencer-platforms .fa-instagram:hover {
+    color: #e4405f;
+}
+
+.influencer-platforms .fa-linkedin:hover {
+    color: #0077b5;
+}
+
+.influencer-platforms .fa-twitter:hover {
+    color: #1da1f2;
+}
+
+.influencer-platforms .fa-youtube:hover {
+    color: #ff0000;
+}
+
 /* Animations */
 @keyframes slideIn {
     from {
@@ -631,6 +755,11 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
 }
 
 .campaign-card,

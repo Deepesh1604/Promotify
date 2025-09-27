@@ -38,6 +38,12 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="{{ url_for('influencer_wallet') }}" class="nav-link">
+                        <i class="fas fa-wallet"></i>
+                        <span>Wallet</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="{{ url_for('ifind') }}" class="nav-link">
                         <i class="fas fa-search"></i>
                         <span>Find Campaigns</span>
@@ -67,13 +73,28 @@
                 <h1>Influencer Dashboard</h1>
                 <p class="header-subtitle">Manage your campaigns and track your performance</p>
             </div>
-            <div class="user-info">
-                <div class="user-avatar">
-                    {{ influencer.username[0].upper() if influencer and influencer.username else 'I' }}
+            <div class="header-right">
+                <div class="search-bar">
+                    <form action="{{ url_for('ifind') }}" method="GET" class="quick-search-form">
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" name="search" class="quick-search-input" 
+                                   placeholder="Find campaigns..." 
+                                   title="Search for campaigns and sponsors">
+                            <button type="submit" class="search-btn">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <div class="user-details">
-                    <span class="user-name">{{ influencer.username if influencer else 'Influencer' }}</span>
-                    <span class="user-role">Content Creator</span>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        {{ influencer.username[0].upper() if influencer and influencer.username else 'I' }}
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name">{{ influencer.username if influencer else 'Influencer' }}</span>
+                        <span class="user-role">Content Creator</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -114,50 +135,172 @@
                         </div>
                         <div class="stat-content">
                             <h3>Active Campaigns</h3>
-                            <p class="stat-number">{{ influencer.campaigns|length if influencer and influencer.campaigns else 0 }}</p>
+                            <p class="stat-number">{{ active_campaigns|length if active_campaigns else 0 }}</p>
                             <span class="stat-label">Currently Running</span>
                         </div>
                     </div>
                     
                     <div class="stat-card">
                         <div class="stat-icon available">
-                            <i class="fas fa-search"></i>
+                            <i class="fas fa-clock"></i>
                         </div>
                         <div class="stat-content">
-                            <h3>Available Opportunities</h3>
-                            <p class="stat-number">{{ active_campaigns|length if active_campaigns else 0 }}</p>
-                            <span class="stat-label">Ready to Apply</span>
+                            <h3>Pending Applications</h3>
+                            <p class="stat-number">{{ pending_applications|length if pending_applications else 0 }}</p>
+                            <span class="stat-label">Awaiting Response</span>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Pending Applications Section -->
+            {% if pending_applications or total_pending > 0 %}
+            <div class="pending-section content-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-clock"></i>
+                        Pending Applications
+                        <span class="badge">{{ total_pending }}</span>
+                    </h2>
+                    {% if pending_applications %}
+                    <div class="section-info">
+                        Showing {{ pending_applications|length }} of {{ total_pending }} applications
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if pending_applications %}
+                <div class="pending-grid">
+                    {% for application in pending_applications %}
+                    <div class="pending-card enhanced-card">
+                        <div class="card-header">
+                            <div class="campaign-info-header">
+                                <h3 class="campaign-name">{{ application.campaign.name }}</h3>
+                                <div class="campaign-meta">
+                                    <span class="campaign-sponsor">
+                                        <i class="fas fa-building"></i>
+                                        {{ application.campaign.sponsor.username }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="status-badge pending">
+                                <i class="fas fa-hourglass-half"></i>
+                                Pending
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="campaign-details">
+                                <div class="detail-row">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span class="detail-label">Budget:</span>
+                                    <span class="detail-value">${{ "{:,.0f}".format(application.campaign.budget) }}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <i class="fas fa-calendar"></i>
+                                    <span class="detail-label">Applied:</span>
+                                    <span class="detail-value">{{ application.created_at.strftime('%B %d, %Y') }}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <i class="fas fa-clock"></i>
+                                    <span class="detail-label">Duration:</span>
+                                    <span class="detail-value">{{ application.campaign.start_date.strftime('%m/%d') }} - {{ application.campaign.end_date.strftime('%m/%d/%Y') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer">
+                            <a href="{{ url_for('influ_dash', campaign_id=application.campaign.id) }}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-eye"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if has_more_pending %}
+                <div class="view-more-section">
+                    <a href="{{ url_for('influ_dash', pending_limit=pending_limit + 10, active_limit=active_limit, available_limit=available_limit) }}" 
+                       class="btn btn-outline view-more-btn">
+                        <i class="fas fa-chevron-down"></i>
+                        View More Pending Applications ({{ total_pending - pending_limit }} remaining)
+                    </a>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-clock"></i>
+                    <p>No pending applications at the moment.</p>
+                    <p class="empty-subtitle">Applications you submit will appear here for tracking.</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
             <!-- Available Campaigns Section -->
             <div class="campaigns-section content-section">
-                <h2 class="section-title">
-                    <i class="fas fa-bullhorn"></i>
-                    Available Campaigns
-                </h2>
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-bullhorn"></i>
+                        Available Campaigns
+                        <span class="badge info">{{ total_available }}</span>
+                    </h2>
+                    {% if available_campaigns %}
+                    <div class="section-info">
+                        Showing {{ available_campaigns|length }} of {{ total_available }} campaigns
+                    </div>
+                    {% endif %}
+                </div>
                 
-                {% if active_campaigns %}
+                {% if available_campaigns %}
                     <div class="campaigns-grid">
-                        {% for campaign in active_campaigns %}
-                        <div class="campaign-card">
-                            <div class="campaign-header">
-                                <div class="campaign-name">{{ campaign.name }}</div>
-                                <div class="campaign-budget">${{ "{:,.0f}".format(campaign.budget) }}</div>
+                        {% for campaign in available_campaigns %}
+                        <div class="campaign-card enhanced-card">
+                            <div class="card-header">
+                                <div class="campaign-info-header">
+                                    <h3 class="campaign-name">{{ campaign.name }}</h3>
+                                    <div class="campaign-meta">
+                                        <span class="campaign-sponsor">
+                                            <i class="fas fa-building"></i>
+                                            {{ campaign.sponsor.username }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="status-badge available">
+                                    <i class="fas fa-star"></i>
+                                    Available
+                                </div>
                             </div>
-                            <div class="campaign-sponsor">
-                                <i class="fas fa-building"></i>
-                                {{ campaign.sponsor.username }}
+                            
+                            <div class="card-body">
+                                <div class="campaign-details">
+                                    <div class="detail-row">
+                                        <i class="fas fa-dollar-sign"></i>
+                                        <span class="detail-label">Budget:</span>
+                                        <span class="detail-value">${{ "{:,.0f}".format(campaign.budget) }}</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <span class="detail-label">Duration:</span>
+                                        <span class="detail-value">{{ campaign.start_date.strftime('%m/%d/%Y') }} - {{ campaign.end_date.strftime('%m/%d/%Y') }}</span>
+                                    </div>
+                                    {% if campaign.description %}
+                                    <div class="detail-row description">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span class="detail-label">Description:</span>
+                                        <span class="detail-value">{{ campaign.description[:100] }}{% if campaign.description|length > 100 %}...{% endif %}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <p class="campaign-description">{{ campaign.description[:100] + '...' if campaign.description and campaign.description|length > 100 else (campaign.description or 'No description available.') }}</p>
-                            <div class="campaign-actions">
-                                <a href="{{ url_for('influ_dash', campaign_id=campaign.id) }}" class="btn btn-secondary">
+                            
+                            <div class="card-footer">
+                                <a href="{{ url_for('influ_dash', campaign_id=campaign.id) }}" class="btn btn-secondary btn-sm">
                                     <i class="fas fa-eye"></i> View Details
                                 </a>
                                 <form action="{{ url_for('apply_campaign', campaign_id=campaign.id) }}" method="post" style="display: inline;">
-                                    <button type="submit" class="btn btn-primary">
+                                    <input type="hidden" name="return_url" value="{{ url_for('influ_dash') }}">
+                                    <button type="submit" class="btn btn-success btn-sm apply-btn">
                                         <i class="fas fa-paper-plane"></i> Apply
                                     </button>
                                 </form>
@@ -165,6 +308,16 @@
                         </div>
                         {% endfor %}
                     </div>
+                    
+                    {% if has_more_available %}
+                    <div class="view-more-section">
+                        <a href="{{ url_for('influ_dash', available_limit=available_limit + 10, pending_limit=pending_limit, active_limit=active_limit) }}" 
+                           class="btn btn-outline view-more-btn">
+                            <i class="fas fa-chevron-down"></i>
+                            View More Available Campaigns ({{ total_available - available_limit }} remaining)
+                        </a>
+                    </div>
+                    {% endif %}
                 {% else %}
                     <div class="empty-state">
                         <i class="fas fa-bullhorn"></i>
@@ -206,32 +359,77 @@
 
             <!-- Your Active Campaigns Section -->
             <div class="active-campaigns-section content-section">
-                <h2 class="section-title">
-                    <i class="fas fa-rocket"></i>
-                    Your Active Campaigns
-                </h2>
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i class="fas fa-rocket"></i>
+                        Your Active Campaigns
+                        <span class="badge success">{{ total_active }}</span>
+                    </h2>
+                    {% if active_campaigns %}
+                    <div class="section-info">
+                        Showing {{ active_campaigns|length }} of {{ total_active }} campaigns
+                    </div>
+                    {% endif %}
+                </div>
                 
-                {% if influencer.campaigns %}
+                {% if active_campaigns %}
                     <div class="active-campaigns-grid">
-                        {% for campaign in influencer.campaigns %}
-                        <div class="active-campaign-card">
-                            <div class="campaign-info">
-                                <div class="campaign-name">{{ campaign.name }}</div>
-                                <div class="campaign-sponsor">
-                                    <i class="fas fa-building"></i> {{ campaign.sponsor.username }}
+                        {% for application in active_campaigns %}
+                        <div class="active-campaign-card enhanced-card">
+                            <div class="card-header">
+                                <div class="campaign-info-header">
+                                    <h3 class="campaign-name">{{ application.campaign.name }}</h3>
+                                    <div class="campaign-meta">
+                                        <span class="campaign-sponsor">
+                                            <i class="fas fa-building"></i>
+                                            {{ application.campaign.sponsor.username }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="status-badge active">
+                                    <i class="fas fa-check-circle"></i>
+                                    Active
                                 </div>
                             </div>
-                            <div class="campaign-status">
-                                <span class="status-badge active">Active</span>
+                            
+                            <div class="card-body">
+                                <div class="campaign-details">
+                                    <div class="detail-row">
+                                        <i class="fas fa-dollar-sign"></i>
+                                        <span class="detail-label">Budget:</span>
+                                        <span class="detail-value">${{ "{:,.0f}".format(application.campaign.budget) }}</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <i class="fas fa-check"></i>
+                                        <span class="detail-label">Accepted:</span>
+                                        <span class="detail-value">{{ application.created_at.strftime('%B %d, %Y') }}</span>
+                                    </div>
+                                    <div class="detail-row">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        <span class="detail-label">Duration:</span>
+                                        <span class="detail-value">{{ application.campaign.start_date.strftime('%m/%d') }} - {{ application.campaign.end_date.strftime('%m/%d/%Y') }}</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="campaign-actions">
-                                <a href="{{ url_for('influ_dash', campaign_id=campaign.id) }}" class="btn btn-primary">
-                                    <i class="fas fa-eye"></i> View Details
+                            
+                            <div class="card-footer">
+                                <a href="{{ url_for('influ_dash', campaign_id=application.campaign.id) }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-rocket"></i> Manage Campaign
                                 </a>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
+                    
+                    {% if has_more_active %}
+                    <div class="view-more-section">
+                        <a href="{{ url_for('influ_dash', active_limit=active_limit + 10, pending_limit=pending_limit, available_limit=available_limit) }}" 
+                           class="btn btn-outline view-more-btn">
+                            <i class="fas fa-chevron-down"></i>
+                            View More Active Campaigns ({{ total_active - active_limit }} remaining)
+                        </a>
+                    </div>
+                    {% endif %}
                 {% else %}
                     <div class="empty-state">
                         <i class="fas fa-rocket"></i>
@@ -245,5 +443,559 @@
             </div>
         </div>
     </main>
+
+    <!-- Success Modal -->
+    {% if session.pop('application_success', None) %}
+        <!-- Application Success Modal -->
+    <div class="modal" id="success-modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="success-message">
+                <i class="fas fa-check-circle"></i>
+                <h3>Application Submitted Successfully!</h3>
+                <p>Your application has been submitted and is now pending review.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if request.args.get('applied') == 'success' %}
+<script>
+// Show success modal on page load
+window.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('success-modal');
+    if (modal) {
+        modal.style.display = 'block';
+    }
+});
+</script>
+{% endif %}
+
+<script>
+// Modal handling
+const modal = document.getElementById('success-modal');
+const span = document.getElementsByClassName('close')[0];
+
+// Close modal when clicking X
+span.onclick = function() {
+    modal.style.display = 'none';
+    // Remove the query parameter from URL
+    const url = new URL(window.location);
+    url.searchParams.delete('applied');
+    window.history.replaceState({}, '', url);
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = 'none';
+        // Remove the query parameter from URL
+        const url = new URL(window.location);
+        url.searchParams.delete('applied');
+        window.history.replaceState({}, '', url);
+    }
+}
+
+// Section toggle functionality
+function toggleSection(sectionType) {
+    const extraDiv = document.getElementById(sectionType + '-extra');
+    const toggleText = document.getElementById(sectionType + '-toggle-text');
+    const toggleIcon = document.getElementById(sectionType + '-toggle-icon');
+    
+    if (extraDiv.classList.contains('hidden')) {
+        // Expand section
+        extraDiv.classList.remove('hidden');
+        extraDiv.style.display = 'grid';
+        toggleText.textContent = 'View Less';
+        toggleIcon.classList.remove('fa-chevron-down');
+        toggleIcon.classList.add('fa-chevron-up');
+    } else {
+        // Collapse section
+        extraDiv.classList.add('hidden');
+        extraDiv.style.display = 'none';
+        toggleText.textContent = 'View All';
+        toggleIcon.classList.remove('fa-chevron-up');
+        toggleIcon.classList.add('fa-chevron-down');
+    }
+}
+
+// Load more campaigns functionality for available campaigns
+function loadMoreCampaigns() {
+    // This can be expanded later for AJAX loading
+    // For now, it just toggles the hidden campaigns
+    toggleSection('available');
+}
+
+// Search functionality
+function searchCampaigns() {
+    const searchInput = document.getElementById('campaign-search');
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    
+    // Get all campaign cards in available section
+    const campaignCards = document.querySelectorAll('.available-campaigns-grid .campaign-card');
+    
+    campaignCards.forEach(card => {
+        const campaignName = card.querySelector('.campaign-name').textContent.toLowerCase();
+        const sponsorName = card.querySelector('.info-item span').textContent.toLowerCase();
+        
+        if (campaignName.includes(searchTerm) || sponsorName.includes(searchTerm)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// Add search on Enter key
+document.getElementById('campaign-search').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        searchCampaigns();
+    }
+});
+</script>
+    {% endif %}
+
+    <style>
+    /* Header Styles */
+    .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    
+    /* Quick Search Bar */
+    .search-bar {
+        position: relative;
+    }
+    
+    .quick-search-form {
+        display: flex;
+        align-items: center;
+    }
+    
+    .search-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 25px;
+        padding: 0.5rem 1rem;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        min-width: 250px;
+    }
+    
+    .search-input-wrapper:hover,
+    .search-input-wrapper:focus-within {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .search-icon {
+        color: rgba(255, 255, 255, 0.6);
+        margin-right: 0.5rem;
+    }
+    
+    .quick-search-input {
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 0.9rem;
+        outline: none;
+        flex: 1;
+        padding: 0.2rem 0;
+    }
+    
+    .quick-search-input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .search-btn {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-left: 0.5rem;
+    }
+    
+    .search-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* Pending Applications Styles */
+    .pending-section {
+        margin-bottom: 2rem;
+    }
+    
+    .badge {
+        background: #ff6b6b;
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+        margin-left: 0.5rem;
+    }
+    
+    .pending-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .pending-card {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 1rem;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+    
+    .pending-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .pending-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.8rem;
+    }
+    
+    .pending-header .campaign-name {
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+    
+    .status-badge {
+        padding: 0.2rem 0.6rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+    }
+    
+    .status-badge.pending {
+        background: rgba(255, 193, 7, 0.2);
+        color: #ffc107;
+        border: 1px solid rgba(255, 193, 7, 0.3);
+    }
+    
+    .status-badge.active {
+        background: rgba(40, 167, 69, 0.2);
+        color: #28a745;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+    
+    .campaign-sponsor,
+    .campaign-budget, 
+    .application-date {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.8rem;
+        margin-bottom: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    
+    .pending-actions {
+        margin-top: 0.8rem;
+    }
+    
+    /* Active Campaigns Grid */
+    .active-campaigns-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .active-campaign-card {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 1rem;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    
+    .active-campaign-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .campaign-info .campaign-name {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+        line-height: 1.2;
+    }
+    
+    .campaign-info .campaign-sponsor,
+    .campaign-info .campaign-budget {
+        font-size: 0.8rem;
+        margin-bottom: 0.3rem;
+    }
+    
+    .campaign-status {
+        margin-left: 1rem;
+        flex-shrink: 0;
+    }
+    
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+    }
+    
+    .modal.show {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .modal-content {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 0;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        animation: slideIn 0.3s ease;
+    }
+    
+    .modal-header {
+        padding: 2rem 2rem 1rem;
+        text-align: center;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .modal-header.success {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        border-radius: 20px 20px 0 0;
+    }
+    
+    .success-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .modal-body {
+        padding: 2rem;
+        color: #333;
+        line-height: 1.6;
+    }
+    
+    .modal-footer {
+        padding: 1rem 2rem 2rem;
+        text-align: center;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideIn {
+        from { 
+            opacity: 0;
+            transform: translateY(-50px) scale(0.9);
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    /* Updated Active Campaign Cards */
+    .active-campaign-card .campaign-budget {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .content-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .header-right {
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .search-input-wrapper {
+            min-width: 200px;
+        }
+        
+        .pending-grid,
+        .active-campaigns-grid {
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+        }
+        
+        .pending-card,
+        .active-campaign-card {
+            padding: 0.8rem;
+        }
+        
+        .pending-header {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .active-campaign-card {
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        
+        .campaign-status {
+            margin-left: 0;
+            align-self: flex-start;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .search-input-wrapper {
+            min-width: 150px;
+        }
+        
+        .quick-search-input {
+            font-size: 0.8rem;
+        }
+        
+        .pending-card,
+        .active-campaign-card {
+            padding: 0.6rem;
+        }
+        
+        .campaign-name {
+            font-size: 0.9rem !important;
+        }
+        
+        .campaign-sponsor,
+        .campaign-budget,
+        .application-date {
+            font-size: 0.75rem !important;
+        }
+    }
+    </style>
+
+    <script>
+    function closeModal() {
+        const modal = document.getElementById('successModal');
+        if (modal) {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.remove();
+            }, 300);
+        }
+    }
+    
+    // Close modal when clicking outside
+    document.addEventListener('click', function(event) {
+        const modal = document.getElementById('successModal');
+        if (modal && event.target === modal) {
+            closeModal();
+        }
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    });
+    
+    // Auto-close modal after 10 seconds
+    setTimeout(() => {
+        const modal = document.getElementById('successModal');
+        if (modal) {
+            closeModal();
+        }
+    }, 10000);
+    
+    // Quick search functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchForm = document.querySelector('.quick-search-form');
+        const searchInput = document.querySelector('.quick-search-input');
+        
+        // Add search shortcut (Ctrl/Cmd + K)
+        document.addEventListener('keydown', function(event) {
+            if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+                event.preventDefault();
+                searchInput.focus();
+            }
+        });
+        
+        // Add loading state to search button
+        searchForm.addEventListener('submit', function() {
+            const searchBtn = this.querySelector('.search-btn');
+            const originalHTML = searchBtn.innerHTML;
+            searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            searchBtn.disabled = true;
+            
+            // Reset after 3 seconds (in case of slow navigation)
+            setTimeout(() => {
+                searchBtn.innerHTML = originalHTML;
+                searchBtn.disabled = false;
+            }, 3000);
+        });
+        
+        // Add search suggestions (optional enhancement)
+        searchInput.addEventListener('input', function() {
+            const value = this.value.trim();
+            if (value.length > 0) {
+                this.setAttribute('title', `Press Enter to search for "${value}"`);
+            } else {
+                this.setAttribute('title', 'Search for campaigns and sponsors');
+            }
+        });
+    });
+    </script>
 </body>
 </html>
