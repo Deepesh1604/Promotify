@@ -18,7 +18,7 @@
 - [✨ Key Features](#-key-features)
 - [💰 Wallet System](#-wallet-system)
 - [🛠️ Technology Stack](#️-technology-stack)
-- [ Quick Start](#-quick-start)
+- [🚀 Quick Start](#-quick-start)
 - [🌍 Real-World Applications](#-real-world-applications)
 
 ---

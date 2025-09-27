@@ -38,6 +38,7 @@ class Campaign(db.Model):
     end_date = db.Column(db.Date, nullable=False)
     budget = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(50))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
     sponsor = db.relationship('Sponsor', backref=db.backref('campaigns', lazy=True, cascade='all, delete-orphan'))
     influencers = db.relationship('Influencer', secondary='application', 
                                   primaryjoin="and_(Campaign.id==Application.campaign_id, Application.status=='accepted')",

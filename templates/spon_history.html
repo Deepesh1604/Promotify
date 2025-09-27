@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sponsor History - Promotify</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/shistory.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="background">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify">
+                <span class="logo-text">Promotify</span>
+            </div>
+            <div class="sponsor-badge">
+                <i class="fas fa-handshake"></i>
+                <span>Sponsor</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="nav-item">
+                    <a href="{{ url_for('spon_dash') }}" class="nav-link">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('spon_camp') }}" class="nav-link">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Create Campaign</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('sponsor_wallet') }}" class="nav-link">
+                        <i class="fas fa-wallet"></i>
+                        <span>Wallet</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('sfind') }}" class="nav-link">
+                        <i class="fas fa-search"></i>
+                        <span>Find Influencers</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-history"></i>
+                        <span>History</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('sstats') }}" class="nav-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item logout">
+                    <a href="{{ url_for('spon_logout') }}" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Content Header -->
+        <header class="content-header">
+            <div class="header-left">
+                <h1><i class="fas fa-history"></i>{{ title }}</h1>
+                <p class="header-subtitle">Track your campaigns, transactions, and payments</p>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="user-details">
+                    <span class="user-name">{{ sponsor.username }}</span>
+                    <span class="user-role">History View</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-header">
+                    <h2><i class="fas fa-filter"></i>Filter History</h2>
+                </div>
+                <div class="filter-controls">
+                    <!-- Time Period Filter -->
+                    <div class="filter-group">
+                        <label class="filter-label">Time Period</label>
+                        <div class="filter-buttons">
+                            <a href="{{ url_for('sponsor_history') }}?filter=today{% if request.args.get('type') %}&type={{ request.args.get('type') }}{% endif %}" class="filter-btn {% if filter_type == 'today' %}active{% endif %}">
+                                <i class="fas fa-calendar-day"></i> Today
+                            </a>
+                            <a href="{{ url_for('sponsor_history') }}?filter=week{% if request.args.get('type') %}&type={{ request.args.get('type') }}{% endif %}" class="filter-btn {% if filter_type == 'week' %}active{% endif %}">
+                                <i class="fas fa-calendar-week"></i> Last Week
+                            </a>
+                            <a href="{{ url_for('sponsor_history') }}?filter=month{% if request.args.get('type') %}&type={{ request.args.get('type') }}{% endif %}" class="filter-btn {% if filter_type == 'month' %}active{% endif %}">
+                                <i class="fas fa-calendar-alt"></i> Last Month
+                            </a>
+                            <a href="{{ url_for('sponsor_history') }}?filter=overall{% if request.args.get('type') %}&type={{ request.args.get('type') }}{% endif %}" class="filter-btn {% if filter_type == 'overall' %}active{% endif %}">
+                                <i class="fas fa-history"></i> Overall
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- History Type Filter -->
+                    <div class="filter-group">
+                        <label class="filter-label">History Type</label>
+                        <div class="filter-buttons secondary">
+                            <a href="{{ url_for('sponsor_history') }}?filter={{ filter_type }}&type=all" class="filter-btn secondary {% if request.args.get('type', 'all') == 'all' %}active{% endif %}">
+                                <i class="fas fa-list"></i> All
+                            </a>
+                            <a href="{{ url_for('sponsor_history') }}?filter={{ filter_type }}&type=campaigns" class="filter-btn secondary {% if request.args.get('type') == 'campaigns' %}active{% endif %}">
+                                <i class="fas fa-bullhorn"></i> Campaigns
+                            </a>
+                            <a href="{{ url_for('sponsor_history') }}?filter={{ filter_type }}&type=transactions" class="filter-btn secondary {% if request.args.get('type') == 'transactions' %}active{% endif %}">
+                                <i class="fas fa-exchange-alt"></i> Wallet Transactions
+                            </a>
+                            <a href="{{ url_for('sponsor_history') }}?filter={{ filter_type }}&type=payments" class="filter-btn secondary {% if request.args.get('type') == 'payments' %}active{% endif %}">
+                                <i class="fas fa-credit-card"></i> Payment History
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <a href="{{ url_for('download_sponsor_history') }}?filter={{ filter_type }}{% if request.args.get('type') %}&type={{ request.args.get('type') }}{% endif %}" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Download CSV
+                    </a>
+                </div>
+            </div>
+
+            <!-- Summary Section -->
+            <div class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-bar"></i>Summary Statistics</h2>
+                    <span class="badge">{{ filter_type.title() }} Period</span>
+                </div>
+                <div class="summary-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-rupee-sign"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="currency">₹{{ "%.2f"|format(summary.total_spent) }}</h3>
+                            <p>Total Spent</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="currency">₹{{ "%.2f"|format(summary.total_recharged) }}</h3>
+                            <p>Total Recharged</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-bullhorn"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ summary.total_campaigns }}</h3>
+                            <p>Campaigns</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>{{ summary.total_payments }}</h3>
+                            <p>Payments Made</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campaigns History -->
+            {% if request.args.get('type', 'all') in ['all', 'campaigns'] %}
+            <div class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-bullhorn"></i>Campaigns History</h2>
+                    <span class="badge">{{ campaigns|length }} campaigns</span>
+                </div>
+                
+                {% if campaigns %}
+                <div class="history-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Campaign Name</th>
+                                <th>Created Date</th>
+                                <th>Duration</th>
+                                <th>Budget</th>
+                                <th>Influencers</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for campaign in campaigns %}
+                            <tr>
+                                <td>
+                                    <div class="campaign-info">
+                                        <strong>{{ campaign.name }}</strong>
+                                        <small>{{ campaign.description[:50] }}{% if campaign.description|length > 50 %}...{% endif %}</small>
+                                    </div>
+                                </td>
+                                <td class="datetime">{{ campaign.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td class="period">{{ campaign.start_date.strftime('%m/%d') }} - {{ campaign.end_date.strftime('%m/%d') }}</td>
+                                <td class="amount currency">₹{{ "%.2f"|format(campaign.budget) }}</td>
+                                <td>
+                                    {% if campaign_applications.get(campaign.id) %}
+                                        {% for app in campaign_applications[campaign.id] %}
+                                        <div class="influencer-info">
+                                            <i class="fas fa-user"></i>
+                                            {{ app.influencer.username }}
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                    <span class="description">No influencers assigned</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if campaign.start_date <= current_date and current_date <= campaign.end_date %}
+                                        <span class="status-badge completed">
+                                            <i class="fas fa-play"></i> Ongoing
+                                        </span>
+                                    {% elif campaign.start_date > current_date %}
+                                        <span class="status-badge completed">
+                                            <i class="fas fa-clock"></i> Upcoming
+                                        </span>
+                                    {% else %}
+                                        <span class="status-badge completed">
+                                            <i class="fas fa-check"></i> Completed
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-bullhorn"></i>
+                    <h3>No campaigns found</h3>
+                    <p>No campaigns found for the selected time period.</p>
+                    <a href="{{ url_for('spon_camp') }}" class="btn btn-primary">Create New Campaign</a>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Transactions History -->
+            {% if request.args.get('type', 'all') in ['all', 'transactions'] %}
+            <div class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-exchange-alt"></i>Wallet Transactions</h2>
+                    <span class="badge">{{ transactions|length }} transactions</span>
+                </div>
+                
+                {% if transactions %}
+                <div class="wallet-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                                <th>Reference</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in transactions %}
+                            <tr>
+                                <td class="datetime">{{ transaction.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    {% if transaction.transaction_type == 'recharge' %}
+                                    <span class="transaction-type recharge">
+                                        <i class="fas fa-plus"></i> Recharge
+                                    </span>
+                                    {% elif transaction.transaction_type == 'debit' %}
+                                    <span class="transaction-type debit">
+                                        <i class="fas fa-minus"></i> Payment
+                                    </span>
+                                    {% else %}
+                                    <span class="transaction-type recharge">
+                                        <i class="fas fa-exchange-alt"></i> {{ transaction.transaction_type.title() }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="amount {% if transaction.transaction_type == 'recharge' %}recharge{% else %}debit{% endif %}">
+                                    {% if transaction.transaction_type == 'recharge' %}+{% else %}-{% endif %}₹{{ "%.2f"|format(transaction.amount) }}
+                                </td>
+                                <td class="description">{{ transaction.description }}</td>
+                                <td>
+                                    {% if transaction.reference_id %}
+                                    <span class="reference">{{ transaction.reference_id }}</span>
+                                    {% else %}
+                                    <span class="no-ref">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-exchange-alt"></i>
+                    <h3>No transactions found</h3>
+                    <p>No wallet transactions found for the selected time period.</p>
+                    <a href="{{ url_for('sponsor_wallet') }}" class="btn btn-primary">Manage Wallet</a>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Payments History -->
+            {% if request.args.get('type', 'all') in ['all', 'payments'] %}
+            <div class="content-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-credit-card"></i>Payment History</h2>
+                    <span class="badge">{{ payments|length }} payments</span>
+                </div>
+                
+                {% if payments %}
+                <div class="history-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Campaign</th>
+                                <th>Influencer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in payments %}
+                            <tr>
+                                <td class="datetime">{{ payment.payment_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    <div class="campaign-info">
+                                        <strong>{{ payment.campaign.name }}</strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="influencer-info">
+                                        <i class="fas fa-user"></i>
+                                        {{ payment.influencer.username }}
+                                    </div>
+                                </td>
+                                <td class="amount debit">₹{{ "%.2f"|format(payment.amount) }}</td>
+                                <td>
+                                    <span class="status-badge completed">
+                                        <i class="fas fa-check"></i> {{ payment.status.title() }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-credit-card"></i>
+                    <h3>No payments found</h3>
+                    <p>No payments made for the selected time period.</p>
+                    <a href="{{ url_for('spon_dash') }}" class="btn btn-primary">View Dashboard</a>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <script>
+        // Auto-refresh for today filter every 30 seconds
+        setInterval(() => {
+            if (window.location.search.includes('filter=today')) {
+                location.reload();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

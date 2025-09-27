@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, request, flash, session
+from flask import render_template, redirect, url_for, request, flash, session, make_response
 from models import db, Influencer, Sponsor, Campaign, Application, WalletTransaction, Payment
 from datetime import datetime, timedelta
 from sqlalchemy import func, or_
@@ -485,6 +485,513 @@ def register_routes(app):
             'data': [instagram_users, twitter_users, youtube_users, linkedin_users]
         }
 
+    @app.route('/ahistory')
+    def admin_history():
+        if 'admin_logged_in' not in session or not session['admin_logged_in']:
+            flash('You need to log in first.', 'error')
+            return redirect(url_for('admin_log'))
+        
+        filter_type = request.args.get('filter', 'overall')
+        search_query = request.args.get('search', '')
+        user_filter = request.args.get('user_filter', 'all')  # all, sponsors, influencers
+        
+        # Calculate date ranges
+        now = datetime.now()
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        week_start = now - timedelta(days=7)
+        month_start = now - timedelta(days=30)
+        
+        # Base queries for all platform data
+        applications_query = Application.query
+        campaigns_query = Campaign.query
+        transactions_query = WalletTransaction.query
+        payments_query = Payment.query
+        sponsors_query = Sponsor.query
+        influencers_query = Influencer.query
+        
+        # Apply date filters
+        if filter_type == 'today':
+            applications = applications_query.filter(Application.created_at >= today_start)
+            campaigns = campaigns_query.filter(Campaign.created_at >= today_start)
+            transactions = transactions_query.filter(WalletTransaction.created_at >= today_start)
+            payments = payments_query.filter(Payment.payment_date >= today_start)
+            sponsors = sponsors_query.filter(Sponsor.date_joined >= today_start.date())
+            influencers = influencers_query.filter(Influencer.date_joined >= today_start.date())
+            title = "Today's Platform Activity"
+        elif filter_type == 'week':
+            applications = applications_query.filter(Application.created_at >= week_start)
+            campaigns = campaigns_query.filter(Campaign.created_at >= week_start)
+            transactions = transactions_query.filter(WalletTransaction.created_at >= week_start)
+            payments = payments_query.filter(Payment.payment_date >= week_start)
+            sponsors = sponsors_query.filter(Sponsor.date_joined >= week_start.date())
+            influencers = influencers_query.filter(Influencer.date_joined >= week_start.date())
+            title = "Last Week's Platform Activity"
+        elif filter_type == 'month':
+            applications = applications_query.filter(Application.created_at >= month_start)
+            campaigns = campaigns_query.filter(Campaign.created_at >= month_start)
+            transactions = transactions_query.filter(WalletTransaction.created_at >= month_start)
+            payments = payments_query.filter(Payment.payment_date >= month_start)
+            sponsors = sponsors_query.filter(Sponsor.date_joined >= month_start.date())
+            influencers = influencers_query.filter(Influencer.date_joined >= month_start.date())
+            title = "Last Month's Platform Activity"
+        else:  # overall
+            applications = applications_query
+            campaigns = campaigns_query
+            transactions = transactions_query
+            payments = payments_query
+            sponsors = sponsors_query
+            influencers = influencers_query
+            title = "Complete Platform History"
+        
+        # Apply search filters
+        if search_query:
+            # Search in campaigns
+            campaigns = campaigns.filter(
+                or_(
+                    Campaign.name.ilike(f'%{search_query}%'),
+                    Campaign.sponsor.has(Sponsor.username.ilike(f'%{search_query}%'))
+                )
+            )
+            
+            # Search in applications
+            applications = applications.filter(
+                or_(
+                    Application.campaign.has(Campaign.name.ilike(f'%{search_query}%')),
+                    Application.influencer.has(Influencer.username.ilike(f'%{search_query}%')),
+                    Application.campaign.has(Campaign.sponsor.has(Sponsor.username.ilike(f'%{search_query}%')))
+                )
+            )
+            
+            # Search in transactions
+            transactions = transactions.filter(
+                WalletTransaction.description.ilike(f'%{search_query}%')
+            )
+            
+            # Search in users
+            sponsors = sponsors.filter(
+                or_(
+                    Sponsor.username.ilike(f'%{search_query}%'),
+                    Sponsor.email.ilike(f'%{search_query}%')
+                )
+            )
+            
+            influencers = influencers.filter(
+                or_(
+                    Influencer.username.ilike(f'%{search_query}%'),
+                    Influencer.email.ilike(f'%{search_query}%')
+                )
+            )
+        
+        # Apply user filter
+        if user_filter == 'sponsors':
+            influencers = influencers.filter(False)  # Empty query
+            applications = applications.filter(False)
+            transactions = transactions.filter(WalletTransaction.user_type == 'sponsor')
+        elif user_filter == 'influencers':
+            sponsors = sponsors.filter(False)  # Empty query
+            campaigns = campaigns.filter(False)
+            transactions = transactions.filter(WalletTransaction.user_type == 'influencer')
+        
+        # Execute queries and order results
+        applications = applications.order_by(Application.created_at.desc()).all()
+        campaigns = campaigns.order_by(Campaign.created_at.desc()).all()
+        transactions = transactions.order_by(WalletTransaction.created_at.desc()).all()
+        payments = payments.order_by(Payment.payment_date.desc()).all()
+        sponsors = sponsors.order_by(Sponsor.date_joined.desc()).all()
+        influencers = influencers.order_by(Influencer.date_joined.desc()).all()
+        
+        # Calculate comprehensive summary statistics
+        total_revenue = sum(t.amount for t in transactions if t.transaction_type == 'debit')
+        total_payouts = sum(t.amount for t in transactions if t.transaction_type == 'credit')
+        total_recharges = sum(t.amount for t in transactions if t.transaction_type == 'recharge')
+        total_withdrawals = sum(t.amount for t in transactions if t.transaction_type == 'withdrawal')
+        
+        total_applications = len(applications)
+        accepted_applications = len([app for app in applications if app.status == 'accepted'])
+        pending_applications = len([app for app in applications if app.status == 'pending'])
+        rejected_applications = len([app for app in applications if app.status == 'rejected'])
+        
+        total_campaigns = len(campaigns)
+        active_campaigns = len([c for c in campaigns if c.start_date <= now.date() <= c.end_date])
+        completed_campaigns = len([c for c in campaigns if c.end_date < now.date()])
+        
+        total_users = len(sponsors) + len(influencers)
+        total_sponsors = len(sponsors)
+        total_influencers = len(influencers)
+        
+        total_payments = len(payments)
+        completed_payments = len([p for p in payments if p.status == 'completed'])
+        
+        summary = {
+            'total_revenue': total_revenue,
+            'total_payouts': total_payouts,
+            'total_recharges': total_recharges,
+            'total_withdrawals': total_withdrawals,
+            'total_applications': total_applications,
+            'accepted_applications': accepted_applications,
+            'pending_applications': pending_applications,
+            'rejected_applications': rejected_applications,
+            'total_campaigns': total_campaigns,
+            'active_campaigns': active_campaigns,
+            'completed_campaigns': completed_campaigns,
+            'total_users': total_users,
+            'total_sponsors': total_sponsors,
+            'total_influencers': total_influencers,
+            'total_payments': total_payments,
+            'completed_payments': completed_payments
+        }
+        
+        return render_template('admin_history.html',
+                               applications=applications,
+                               campaigns=campaigns,
+                               transactions=transactions,
+                               payments=payments,
+                               sponsors=sponsors,
+                               influencers=influencers,
+                               filter_type=filter_type,
+                               search_query=search_query,
+                               user_filter=user_filter,
+                               title=title,
+                               summary=summary,
+                               current_date=now.date())
+
+    @app.route('/ahistory/download')
+    def download_admin_history():
+        if 'admin_logged_in' not in session or not session['admin_logged_in']:
+            flash('You need to log in first.', 'error')
+            return redirect(url_for('admin_log'))
+        
+        filter_type = request.args.get('filter', 'overall')
+        search_query = request.args.get('search', '')
+        user_filter = request.args.get('user_filter', 'all')
+        history_type = request.args.get('type', 'all')
+        
+        # Calculate date ranges (same as history route)
+        now = datetime.now()
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        week_start = now - timedelta(days=7)
+        month_start = now - timedelta(days=30)
+        
+        # Base queries
+        applications_query = Application.query
+        campaigns_query = Campaign.query
+        transactions_query = WalletTransaction.query
+        payments_query = Payment.query
+        sponsors_query = Sponsor.query
+        influencers_query = Influencer.query
+        
+        # Apply date filters (same logic as history route)
+        if filter_type == 'today':
+            applications = applications_query.filter(Application.created_at >= today_start)
+            campaigns = campaigns_query.filter(Campaign.created_at >= today_start)
+            transactions = transactions_query.filter(WalletTransaction.created_at >= today_start)
+            payments = payments_query.filter(Payment.payment_date >= today_start)
+            sponsors = sponsors_query.filter(Sponsor.date_joined >= today_start.date())
+            influencers = influencers_query.filter(Influencer.date_joined >= today_start.date())
+            period_suffix = "today"
+        elif filter_type == 'week':
+            applications = applications_query.filter(Application.created_at >= week_start)
+            campaigns = campaigns_query.filter(Campaign.created_at >= week_start)
+            transactions = transactions_query.filter(WalletTransaction.created_at >= week_start)
+            payments = payments_query.filter(Payment.payment_date >= week_start)
+            sponsors = sponsors_query.filter(Sponsor.date_joined >= week_start.date())
+            influencers = influencers_query.filter(Influencer.date_joined >= week_start.date())
+            period_suffix = "week"
+        elif filter_type == 'month':
+            applications = applications_query.filter(Application.created_at >= month_start)
+            campaigns = campaigns_query.filter(Campaign.created_at >= month_start)
+            transactions = transactions_query.filter(WalletTransaction.created_at >= month_start)
+            payments = payments_query.filter(Payment.payment_date >= month_start)
+            sponsors = sponsors_query.filter(Sponsor.date_joined >= month_start.date())
+            influencers = influencers_query.filter(Influencer.date_joined >= month_start.date())
+            period_suffix = "month"
+        else:  # overall
+            applications = applications_query
+            campaigns = campaigns_query
+            transactions = transactions_query
+            payments = payments_query
+            sponsors = sponsors_query
+            influencers = influencers_query
+            period_suffix = "overall"
+        
+        # Apply search and user filters (same as history route)
+        if search_query:
+            campaigns = campaigns.filter(
+                or_(
+                    Campaign.name.ilike(f'%{search_query}%'),
+                    Campaign.sponsor.has(Sponsor.username.ilike(f'%{search_query}%'))
+                )
+            )
+            applications = applications.filter(
+                or_(
+                    Application.campaign.has(Campaign.name.ilike(f'%{search_query}%')),
+                    Application.influencer.has(Influencer.username.ilike(f'%{search_query}%')),
+                    Application.campaign.has(Campaign.sponsor.has(Sponsor.username.ilike(f'%{search_query}%')))
+                )
+            )
+            transactions = transactions.filter(WalletTransaction.description.ilike(f'%{search_query}%'))
+            sponsors = sponsors.filter(
+                or_(
+                    Sponsor.username.ilike(f'%{search_query}%'),
+                    Sponsor.email.ilike(f'%{search_query}%')
+                )
+            )
+            influencers = influencers.filter(
+                or_(
+                    Influencer.username.ilike(f'%{search_query}%'),
+                    Influencer.email.ilike(f'%{search_query}%')
+                )
+            )
+        
+        if user_filter == 'sponsors':
+            influencers = influencers.filter(False)
+            applications = applications.filter(False)
+            transactions = transactions.filter(WalletTransaction.user_type == 'sponsor')
+        elif user_filter == 'influencers':
+            sponsors = sponsors.filter(False)
+            campaigns = campaigns.filter(False)
+            transactions = transactions.filter(WalletTransaction.user_type == 'influencer')
+        
+        # Execute queries
+        applications = applications.order_by(Application.created_at.desc()).all()
+        campaigns = campaigns.order_by(Campaign.created_at.desc()).all()
+        transactions = transactions.order_by(WalletTransaction.created_at.desc()).all()
+        payments = payments.order_by(Payment.payment_date.desc()).all()
+        sponsors = sponsors.order_by(Sponsor.date_joined.desc()).all()
+        influencers = influencers.order_by(Influencer.date_joined.desc()).all()
+        
+        # Apply history type filter
+        if history_type == 'applications':
+            campaigns = []
+            transactions = []
+            payments = []
+            sponsors = []
+            influencers = []
+            type_suffix = "applications"
+        elif history_type == 'campaigns':
+            applications = []
+            transactions = []
+            payments = []
+            sponsors = []
+            influencers = []
+            type_suffix = "campaigns"
+        elif history_type == 'transactions':
+            applications = []
+            campaigns = []
+            payments = []
+            sponsors = []
+            influencers = []
+            type_suffix = "transactions"
+        elif history_type == 'payments':
+            applications = []
+            campaigns = []
+            transactions = []
+            sponsors = []
+            influencers = []
+            type_suffix = "payments"
+        elif history_type == 'users':
+            applications = []
+            campaigns = []
+            transactions = []
+            payments = []
+            type_suffix = "users"
+        else:  # all
+            type_suffix = "all"
+        
+        # Generate filename
+        search_suffix = f"_{search_query}" if search_query else ""
+        user_suffix = f"_{user_filter}" if user_filter != 'all' else ""
+        filename = f"admin_history_{period_suffix}_{type_suffix}{user_suffix}{search_suffix}_{now.strftime('%Y%m%d')}.csv"
+        
+        # Create CSV content
+        import csv
+        import io
+        
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # Write comprehensive headers based on history type
+        if history_type == 'applications':
+            writer.writerow(['Application Date', 'Campaign', 'Sponsor', 'Influencer', 'Budget', 'Status'])
+        elif history_type == 'campaigns':
+            writer.writerow(['Creation Date', 'Campaign Name', 'Sponsor', 'Start Date', 'End Date', 'Budget', 'Description'])
+        elif history_type == 'transactions':
+            writer.writerow(['Date', 'User Type', 'Username', 'Transaction Type', 'Amount', 'Description', 'Reference'])
+        elif history_type == 'payments':
+            writer.writerow(['Payment Date', 'Campaign', 'Sponsor', 'Influencer', 'Amount', 'Status'])
+        elif history_type == 'users':
+            writer.writerow(['Join Date', 'User Type', 'Username', 'Email', 'Additional Info'])
+        else:  # all types
+            writer.writerow(['Type', 'Date', 'Primary Info', 'Secondary Info', 'Amount', 'Status', 'Description'])
+        
+        # Write data based on type
+        all_data = []
+        
+        # Applications data
+        for application in applications:
+            if history_type in ['applications', 'all']:
+                if history_type == 'applications':
+                    writer.writerow([
+                        application.created_at.strftime('%Y-%m-%d %H:%M'),
+                        application.campaign.name,
+                        application.campaign.sponsor.username,
+                        application.influencer.username,
+                        f"₹{application.campaign.budget:.2f}",
+                        application.status.title()
+                    ])
+                else:
+                    all_data.append([
+                        'Application',
+                        application.created_at.strftime('%Y-%m-%d %H:%M'),
+                        f"{application.influencer.username} → {application.campaign.name}",
+                        f"Sponsor: {application.campaign.sponsor.username}",
+                        f"₹{application.campaign.budget:.2f}",
+                        application.status.title(),
+                        f"Application for campaign {application.campaign.name}"
+                    ])
+        
+        # Campaign data
+        for campaign in campaigns:
+            if history_type in ['campaigns', 'all']:
+                if history_type == 'campaigns':
+                    writer.writerow([
+                        campaign.created_at.strftime('%Y-%m-%d %H:%M'),
+                        campaign.name,
+                        campaign.sponsor.username,
+                        campaign.start_date.strftime('%Y-%m-%d'),
+                        campaign.end_date.strftime('%Y-%m-%d'),
+                        f"₹{campaign.budget:.2f}",
+                        campaign.description[:100] + '...' if len(campaign.description) > 100 else campaign.description
+                    ])
+                else:
+                    all_data.append([
+                        'Campaign',
+                        campaign.created_at.strftime('%Y-%m-%d %H:%M'),
+                        campaign.name,
+                        f"By: {campaign.sponsor.username}",
+                        f"₹{campaign.budget:.2f}",
+                        f"{campaign.start_date} to {campaign.end_date}",
+                        campaign.description[:100] + '...' if len(campaign.description) > 100 else campaign.description
+                    ])
+        
+        # Transaction data
+        for transaction in transactions:
+            if history_type in ['transactions', 'all']:
+                user = None
+                if transaction.user_type == 'sponsor':
+                    user = Sponsor.query.get(transaction.user_id)
+                elif transaction.user_type == 'influencer':
+                    user = Influencer.query.get(transaction.user_id)
+                
+                username = user.username if user else f"Unknown {transaction.user_type}"
+                
+                if history_type == 'transactions':
+                    writer.writerow([
+                        transaction.created_at.strftime('%Y-%m-%d %H:%M'),
+                        transaction.user_type.title(),
+                        username,
+                        transaction.transaction_type.title(),
+                        f"₹{transaction.amount:.2f}",
+                        transaction.description,
+                        transaction.reference_id or 'N/A'
+                    ])
+                else:
+                    all_data.append([
+                        'Transaction',
+                        transaction.created_at.strftime('%Y-%m-%d %H:%M'),
+                        f"{transaction.transaction_type.title()} by {username}",
+                        f"User: {transaction.user_type.title()}",
+                        f"₹{transaction.amount:.2f}",
+                        'Completed',
+                        transaction.description
+                    ])
+        
+        # Payment data
+        for payment in payments:
+            if history_type in ['payments', 'all']:
+                if history_type == 'payments':
+                    writer.writerow([
+                        payment.payment_date.strftime('%Y-%m-%d %H:%M'),
+                        payment.campaign.name,
+                        payment.sponsor.username,
+                        payment.influencer.username,
+                        f"₹{payment.amount:.2f}",
+                        payment.status.title()
+                    ])
+                else:
+                    all_data.append([
+                        'Payment',
+                        payment.payment_date.strftime('%Y-%m-%d %H:%M'),
+                        f"{payment.sponsor.username} → {payment.influencer.username}",
+                        f"Campaign: {payment.campaign.name}",
+                        f"₹{payment.amount:.2f}",
+                        payment.status.title(),
+                        f"Payment for campaign {payment.campaign.name}"
+                    ])
+        
+        # User registration data
+        for sponsor in sponsors:
+            if history_type in ['users', 'all']:
+                if history_type == 'users':
+                    writer.writerow([
+                        sponsor.date_joined.strftime('%Y-%m-%d'),
+                        'Sponsor',
+                        sponsor.username,
+                        sponsor.email,
+                        f"Industry: {sponsor.industry}"
+                    ])
+                else:
+                    all_data.append([
+                        'User Registration',
+                        sponsor.date_joined.strftime('%Y-%m-%d'),
+                        f"Sponsor: {sponsor.username}",
+                        sponsor.email,
+                        '-',
+                        'Registered',
+                        f"New sponsor registered - Industry: {sponsor.industry}"
+                    ])
+        
+        for influencer in influencers:
+            if history_type in ['users', 'all']:
+                platforms = []
+                if influencer.instagram: platforms.append('Instagram')
+                if influencer.twitter: platforms.append('Twitter')
+                if influencer.youtube: platforms.append('YouTube')
+                if influencer.linkedin: platforms.append('LinkedIn')
+                
+                if history_type == 'users':
+                    writer.writerow([
+                        influencer.date_joined.strftime('%Y-%m-%d'),
+                        'Influencer',
+                        influencer.username,
+                        influencer.email,
+                        f"Platforms: {', '.join(platforms) if platforms else 'None'}"
+                    ])
+                else:
+                    all_data.append([
+                        'User Registration',
+                        influencer.date_joined.strftime('%Y-%m-%d'),
+                        f"Influencer: {influencer.username}",
+                        influencer.email,
+                        '-',
+                        'Registered',
+                        f"New influencer registered - Platforms: {', '.join(platforms) if platforms else 'None'}"
+                    ])
+        
+        # For 'all' type, sort by date and write
+        if history_type == 'all':
+            # Sort all data by date (index 1)
+            all_data.sort(key=lambda x: x[1], reverse=True)
+            for row in all_data:
+                writer.writerow(row)
+        
+        # Create response
+        response = make_response(output.getvalue())
+        response.headers['Content-Type'] = 'text/csv'
+        response.headers['Content-Disposition'] = f'attachment; filename={filename}'
+        
+        return response
+
     @app.route('/astats')
     def admin_stats():
         user_distribution = get_user_distribution()
@@ -510,6 +1017,236 @@ def register_routes(app):
     def influ_stats():
         return render_template('influ_stats.html')
 
+    @app.route('/ihistory')
+    def influencer_history():
+        if 'influencer_id' not in session:
+            flash('You need to log in first.', 'error')
+            return redirect(url_for('influ_log'))
+        
+        influencer = Influencer.query.get(session['influencer_id'])
+        filter_type = request.args.get('filter', 'overall')
+        
+        # Calculate date ranges
+        now = datetime.now()
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        week_start = now - timedelta(days=7)
+        month_start = now - timedelta(days=30)
+        
+        # Base queries for influencer's data
+        applications_query = Application.query.filter_by(influencer_id=influencer.id)
+        transactions_query = WalletTransaction.query.filter_by(user_id=influencer.id, user_type='influencer')
+        payments_query = Payment.query.filter_by(influencer_id=influencer.id)
+        
+        # Apply date filters
+        if filter_type == 'today':
+            applications = applications_query.filter(Application.created_at >= today_start).all()
+            transactions = transactions_query.filter(WalletTransaction.created_at >= today_start).all()
+            payments = payments_query.filter(Payment.payment_date >= today_start).all()
+            title = "Today's History"
+        elif filter_type == 'week':
+            applications = applications_query.filter(Application.created_at >= week_start).all()
+            transactions = transactions_query.filter(WalletTransaction.created_at >= week_start).all()
+            payments = payments_query.filter(Payment.payment_date >= week_start).all()
+            title = "Last Week's History"
+        elif filter_type == 'month':
+            applications = applications_query.filter(Application.created_at >= month_start).all()
+            transactions = transactions_query.filter(WalletTransaction.created_at >= month_start).all()
+            payments = payments_query.filter(Payment.payment_date >= month_start).all()
+            title = "Last Month's History"
+        else:  # overall
+            applications = applications_query.all()
+            transactions = transactions_query.all()
+            payments = payments_query.all()
+            title = "Complete History"
+        
+        # Calculate summary statistics
+        total_earned = sum(t.amount for t in transactions if t.transaction_type == 'credit')
+        total_withdrawn = sum(t.amount for t in transactions if t.transaction_type == 'withdrawal')
+        total_applications = len(applications)
+        total_payments = len(payments)
+        accepted_campaigns = len([app for app in applications if app.status == 'accepted'])
+        
+        # Debug information
+        print(f"DEBUG - Influencer ID: {influencer.id}")
+        print(f"DEBUG - Transactions count: {len(transactions)}")
+        print(f"DEBUG - Applications count: {len(applications)}")
+        print(f"DEBUG - Payments count: {len(payments)}")
+        print(f"DEBUG - Credit transactions: {[t.amount for t in transactions if t.transaction_type == 'credit']}")
+        print(f"DEBUG - Withdrawal transactions: {[t.amount for t in transactions if t.transaction_type == 'withdrawal']}")
+        print(f"DEBUG - Total earned: {total_earned}")
+        print(f"DEBUG - Total withdrawn: {total_withdrawn}")
+        print(f"DEBUG - Accepted campaigns: {accepted_campaigns}")
+        print(f"DEBUG - Current balance: {influencer.wallet_balance}")
+        
+        summary = {
+            'total_earned': total_earned,
+            'total_withdrawn': total_withdrawn,
+            'total_applications': total_applications,
+            'total_payments': total_payments,
+            'accepted_campaigns': accepted_campaigns,
+            'current_balance': influencer.wallet_balance
+        }
+        
+        return render_template('influ_history.html',
+                               influencer=influencer,
+                               applications=applications,
+                               transactions=transactions,
+                               payments=payments,
+                               filter_type=filter_type,
+                               title=title,
+                               summary=summary,
+                               current_date=now.date())
+
+    @app.route('/ihistory/download')
+    def download_influencer_history():
+        if 'influencer_id' not in session:
+            flash('You need to log in first.', 'error')
+            return redirect(url_for('influ_log'))
+        
+        influencer = Influencer.query.get(session['influencer_id'])
+        filter_type = request.args.get('filter', 'overall')
+        history_type = request.args.get('type', 'all')
+        
+        # Calculate date ranges
+        now = datetime.now()
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        week_start = now - timedelta(days=7)
+        month_start = now - timedelta(days=30)
+        
+        # Base queries for influencer's data
+        applications_query = Application.query.filter_by(influencer_id=influencer.id)
+        transactions_query = WalletTransaction.query.filter_by(user_id=influencer.id, user_type='influencer')
+        payments_query = Payment.query.filter_by(influencer_id=influencer.id)
+        
+        # Apply date filters
+        if filter_type == 'today':
+            applications = applications_query.filter(Application.created_at >= today_start).all()
+            transactions = transactions_query.filter(WalletTransaction.created_at >= today_start).all()
+            payments = payments_query.filter(Payment.payment_date >= today_start).all()
+            period_suffix = "today"
+        elif filter_type == 'week':
+            applications = applications_query.filter(Application.created_at >= week_start).all()
+            transactions = transactions_query.filter(WalletTransaction.created_at >= week_start).all()
+            payments = payments_query.filter(Payment.payment_date >= week_start).all()
+            period_suffix = "week"
+        elif filter_type == 'month':
+            applications = applications_query.filter(Application.created_at >= month_start).all()
+            transactions = transactions_query.filter(WalletTransaction.created_at >= month_start).all()
+            payments = payments_query.filter(Payment.payment_date >= month_start).all()
+            period_suffix = "month"
+        else:  # overall
+            applications = applications_query.all()
+            transactions = transactions_query.all()
+            payments = payments_query.all()
+            period_suffix = "overall"
+        
+        # Apply history type filter
+        if history_type == 'applications':
+            transactions = []
+            payments = []
+            type_suffix = "applications"
+        elif history_type == 'transactions':
+            applications = []
+            payments = []
+            type_suffix = "transactions"
+        elif history_type == 'payments':
+            applications = []
+            transactions = []
+            type_suffix = "payments"
+        else:  # all
+            type_suffix = "all"
+        
+        # Generate filename based on filters
+        filename = f"influencer_history_{period_suffix}_{type_suffix}_{now.strftime('%Y%m%d')}.csv"
+        
+        # Create CSV content
+        import csv
+        import io
+        
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # Write appropriate headers based on history type
+        if history_type == 'applications':
+            writer.writerow(['Application Date', 'Campaign', 'Sponsor', 'Budget', 'Status', 'Campaign Description'])
+        elif history_type == 'transactions':
+            writer.writerow(['Date', 'Transaction Type', 'Amount', 'Description', 'Reference ID'])
+        elif history_type == 'payments':
+            writer.writerow(['Payment Date', 'Campaign', 'Sponsor', 'Amount', 'Status'])
+        else:  # all types
+            writer.writerow(['Type', 'Date', 'Campaign/Transaction', 'Sponsor', 'Amount', 'Status', 'Description'])
+        
+        # Application data
+        for application in applications:
+            if history_type == 'applications':
+                writer.writerow([
+                    application.created_at.strftime('%Y-%m-%d %H:%M'),
+                    application.campaign.name,
+                    application.campaign.sponsor.username,
+                    f"₹{application.campaign.budget:.2f}",
+                    application.status.title(),
+                    application.campaign.description[:100] + '...' if len(application.campaign.description) > 100 else application.campaign.description
+                ])
+            else:
+                writer.writerow([
+                    'Application',
+                    application.created_at.strftime('%Y-%m-%d %H:%M'),
+                    application.campaign.name,
+                    application.campaign.sponsor.username,
+                    f"₹{application.campaign.budget:.2f}",
+                    application.status.title(),
+                    f"Applied to {application.campaign.name}"
+                ])
+        
+        # Transaction data
+        for transaction in transactions:
+            if history_type == 'transactions':
+                writer.writerow([
+                    transaction.created_at.strftime('%Y-%m-%d %H:%M'),
+                    transaction.transaction_type.title(),
+                    f"₹{transaction.amount:.2f}",
+                    transaction.description,
+                    transaction.reference_id if transaction.reference_id else 'N/A'
+                ])
+            else:
+                writer.writerow([
+                    'Transaction',
+                    transaction.created_at.strftime('%Y-%m-%d %H:%M'),
+                    transaction.transaction_type.title(),
+                    '-',
+                    f"₹{transaction.amount:.2f}",
+                    'Completed',
+                    transaction.description
+                ])
+        
+        # Payment data
+        for payment in payments:
+            if history_type == 'payments':
+                writer.writerow([
+                    payment.payment_date.strftime('%Y-%m-%d %H:%M'),
+                    payment.campaign.name,
+                    payment.campaign.sponsor.username,
+                    f"₹{payment.amount:.2f}",
+                    payment.status.title()
+                ])
+            else:
+                writer.writerow([
+                    'Payment',
+                    payment.payment_date.strftime('%Y-%m-%d %H:%M'),
+                    payment.campaign.name,
+                    payment.campaign.sponsor.username,
+                    f"₹{payment.amount:.2f}",
+                    payment.status.title(),
+                    f"Payment from {payment.campaign.sponsor.username} for {payment.campaign.name}"
+                ])
+        
+        # Create response
+        response = make_response(output.getvalue())
+        response.headers['Content-Type'] = 'text/csv'
+        response.headers['Content-Disposition'] = f'attachment; filename={filename}'
+        
+        return response
+
     @app.route('/sstats')
     def sstats():
         total_campaigns = Campaign.query.count()
@@ -525,6 +1262,256 @@ def register_routes(app):
         }
 
         return render_template('spon_stats.html', stats=stats)
+
+    @app.route('/shistory')
+    def sponsor_history():
+        if 'sponsor_id' not in session:
+            flash('You need to log in first.', 'error')
+            return redirect(url_for('spon_log'))
+        
+        sponsor = Sponsor.query.get(session['sponsor_id'])
+        filter_type = request.args.get('filter', 'overall')
+        
+        # Calculate date ranges
+        now = datetime.now()
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        week_start = now - timedelta(days=7)
+        month_start = now - timedelta(days=30)
+        
+        # Base queries for sponsor's data
+        campaigns_query = Campaign.query.filter_by(sponsor_id=sponsor.id)
+        transactions_query = WalletTransaction.query.filter_by(user_id=sponsor.id, user_type='sponsor')
+        payments_query = Payment.query.filter_by(sponsor_id=sponsor.id)
+        
+        # Apply date filters
+        if filter_type == 'today':
+            campaigns = campaigns_query.filter(Campaign.created_at >= today_start).all()
+            transactions = transactions_query.filter(WalletTransaction.created_at >= today_start).all()
+            payments = payments_query.filter(Payment.payment_date >= today_start).all()
+            title = "Today's History"
+        elif filter_type == 'week':
+            campaigns = campaigns_query.filter(Campaign.created_at >= week_start).all()
+            transactions = transactions_query.filter(WalletTransaction.created_at >= week_start).all()
+            payments = payments_query.filter(Payment.payment_date >= week_start).all()
+            title = "Last Week's History"
+        elif filter_type == 'month':
+            campaigns = campaigns_query.filter(Campaign.created_at >= month_start).all()
+            transactions = transactions_query.filter(WalletTransaction.created_at >= month_start).all()
+            payments = payments_query.filter(Payment.payment_date >= month_start).all()
+            title = "Last Month's History"
+        else:  # overall
+            campaigns = campaigns_query.all()
+            transactions = transactions_query.all()
+            payments = payments_query.all()
+            title = "Complete History"
+        
+        # Get accepted applications for campaigns
+        campaign_applications = {}
+        for campaign in campaigns:
+            accepted_apps = Application.query.filter_by(
+                campaign_id=campaign.id, 
+                status='accepted'
+            ).all()
+            campaign_applications[campaign.id] = accepted_apps
+        
+        # Calculate summary statistics
+        total_spent = sum(t.amount for t in transactions if t.transaction_type == 'debit')
+        total_recharged = sum(t.amount for t in transactions if t.transaction_type == 'recharge')
+        total_campaigns = len(campaigns)
+        total_payments = len(payments)
+        
+        summary = {
+            'total_spent': total_spent,
+            'total_recharged': total_recharged,
+            'total_campaigns': total_campaigns,
+            'total_payments': total_payments,
+            'current_balance': sponsor.wallet_balance
+        }
+        
+        return render_template('spon_history.html',
+                               sponsor=sponsor,
+                               campaigns=campaigns,
+                               transactions=transactions,
+                               payments=payments,
+                               campaign_applications=campaign_applications,
+                               filter_type=filter_type,
+                               title=title,
+                               summary=summary,
+                               current_date=now.date())
+
+    @app.route('/shistory/download')
+    def download_sponsor_history():
+        if 'sponsor_id' not in session:
+            flash('You need to log in first.', 'error')
+            return redirect(url_for('spon_log'))
+        
+        sponsor = Sponsor.query.get(session['sponsor_id'])
+        filter_type = request.args.get('filter', 'overall')
+        history_type = request.args.get('type', 'all')
+        
+        # Calculate date ranges (same as history route)
+        now = datetime.now()
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        week_start = now - timedelta(days=7)
+        month_start = now - timedelta(days=30)
+        
+        # Base queries for sponsor's data
+        campaigns_query = Campaign.query.filter_by(sponsor_id=sponsor.id)
+        transactions_query = WalletTransaction.query.filter_by(user_id=sponsor.id, user_type='sponsor')
+        payments_query = Payment.query.filter_by(sponsor_id=sponsor.id)
+        
+        # Apply date filters
+        if filter_type == 'today':
+            campaigns = campaigns_query.filter(Campaign.created_at >= today_start).all()
+            transactions = transactions_query.filter(WalletTransaction.created_at >= today_start).all()
+            payments = payments_query.filter(Payment.payment_date >= today_start).all()
+            period_suffix = "today"
+        elif filter_type == 'week':
+            campaigns = campaigns_query.filter(Campaign.created_at >= week_start).all()
+            transactions = transactions_query.filter(WalletTransaction.created_at >= week_start).all()
+            payments = payments_query.filter(Payment.payment_date >= week_start).all()
+            period_suffix = "week"
+        elif filter_type == 'month':
+            campaigns = campaigns_query.filter(Campaign.created_at >= month_start).all()
+            transactions = transactions_query.filter(WalletTransaction.created_at >= month_start).all()
+            payments = payments_query.filter(Payment.payment_date >= month_start).all()
+            period_suffix = "month"
+        else:  # overall
+            campaigns = campaigns_query.all()
+            transactions = transactions_query.all()
+            payments = payments_query.all()
+            period_suffix = "overall"
+        
+        # Apply history type filter
+        if history_type == 'campaigns':
+            transactions = []
+            payments = []
+            type_suffix = "campaigns"
+        elif history_type == 'transactions':
+            campaigns = []
+            payments = []
+            type_suffix = "transactions"
+        elif history_type == 'payments':
+            campaigns = []
+            transactions = []
+            type_suffix = "payments"
+        else:  # all
+            type_suffix = "all"
+        
+        # Generate filename based on filters
+        filename = f"sponsor_history_{period_suffix}_{type_suffix}_{now.strftime('%Y%m%d')}.csv"
+        
+        # Create CSV content
+        import csv
+        import io
+        from flask import make_response
+        
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # Write appropriate headers based on history type
+        if history_type == 'campaigns':
+            writer.writerow(['Campaign Name', 'Created Date', 'Start Date', 'End Date', 'Budget', 'Influencer', 'Status', 'Description'])
+        elif history_type == 'transactions':
+            writer.writerow(['Date', 'Transaction Type', 'Amount', 'Description', 'Reference ID'])
+        elif history_type == 'payments':
+            writer.writerow(['Payment Date', 'Campaign', 'Influencer', 'Amount', 'Status'])
+        else:  # all types
+            writer.writerow(['Type', 'Date', 'Campaign/Transaction', 'Influencer', 'Amount', 'Status', 'Description'])
+        
+        # Campaign data
+        for campaign in campaigns:
+            accepted_apps = Application.query.filter_by(campaign_id=campaign.id, status='accepted').all()
+            if history_type == 'campaigns':
+                # Specific campaign format
+                if accepted_apps:
+                    for app in accepted_apps:
+                        writer.writerow([
+                            campaign.name,
+                            campaign.created_at.strftime('%Y-%m-%d %H:%M'),
+                            campaign.start_date.strftime('%Y-%m-%d'),
+                            campaign.end_date.strftime('%Y-%m-%d'),
+                            f"₹{campaign.budget:.2f}",
+                            app.influencer.username,
+                            'Completed',
+                            campaign.description[:100] + '...' if len(campaign.description) > 100 else campaign.description
+                        ])
+                else:
+                    writer.writerow([
+                        campaign.name,
+                        campaign.created_at.strftime('%Y-%m-%d %H:%M'),
+                        campaign.start_date.strftime('%Y-%m-%d'),
+                        campaign.end_date.strftime('%Y-%m-%d'),
+                        f"₹{campaign.budget:.2f}",
+                        'No influencers assigned',
+                        'Active',
+                        campaign.description[:100] + '...' if len(campaign.description) > 100 else campaign.description
+                    ])
+            else:
+                # General format for 'all' type
+                for app in accepted_apps:
+                    writer.writerow([
+                        'Campaign',
+                        campaign.created_at.strftime('%Y-%m-%d %H:%M'),
+                        campaign.name,
+                        app.influencer.username,
+                        f"₹{campaign.budget:.2f}",
+                        'Completed',
+                        f"Campaign with {app.influencer.username}"
+                    ])
+        
+        # Transaction data
+        for transaction in transactions:
+            if history_type == 'transactions':
+                # Specific transaction format
+                writer.writerow([
+                    transaction.created_at.strftime('%Y-%m-%d %H:%M'),
+                    transaction.transaction_type.title(),
+                    f"₹{transaction.amount:.2f}",
+                    transaction.description,
+                    transaction.reference_id if transaction.reference_id else 'N/A'
+                ])
+            else:
+                # General format for 'all' type
+                writer.writerow([
+                    'Transaction',
+                    transaction.created_at.strftime('%Y-%m-%d %H:%M'),
+                    transaction.transaction_type.title(),
+                    '-',
+                    f"₹{transaction.amount:.2f}",
+                    'Completed',
+                    transaction.description
+                ])
+        
+        # Payment data
+        for payment in payments:
+            if history_type == 'payments':
+                # Specific payment format
+                writer.writerow([
+                    payment.payment_date.strftime('%Y-%m-%d %H:%M'),
+                    payment.campaign.name,
+                    payment.influencer.username,
+                    f"₹{payment.amount:.2f}",
+                    payment.status.title()
+                ])
+            else:
+                # General format for 'all' type
+                writer.writerow([
+                    'Payment',
+                    payment.payment_date.strftime('%Y-%m-%d %H:%M'),
+                    payment.campaign.name,
+                    payment.influencer.username,
+                    f"₹{payment.amount:.2f}",
+                    payment.status.title(),
+                    f"Payment to {payment.influencer.username} for {payment.campaign.name}"
+                ])
+        
+        # Create response
+        response = make_response(output.getvalue())
+        response.headers['Content-Type'] = 'text/csv'
+        response.headers['Content-Disposition'] = f'attachment; filename={filename}'
+        
+        return response
 
     @app.route('/sdash')
     @app.route('/sdash/<int:campaign_id>')
