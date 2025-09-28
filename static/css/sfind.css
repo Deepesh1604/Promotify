@@ -341,9 +341,24 @@ body {
     gap: 8px;
 }
 
-.search-btn:hover {
+.search-btn:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: var(--shadow-medium);
+}
+
+.search-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.loading-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 /* Results Sections */
@@ -364,6 +379,340 @@ body {
 
 .section-title i {
     color: var(--sponsor-color);
+}
+
+.results-count {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 400;
+    margin-left: 10px;
+}
+
+/* Search Results */
+.search-results-section {
+    animation: slideIn 0.5s ease-out;
+}
+
+.influencers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+    margin-top: 25px;
+}
+
+.influencer-card {
+    background: var(--surface-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    backdrop-filter: blur(20px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-light);
+    position: relative;
+    overflow: hidden;
+}
+
+.influencer-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--gradient-sponsor);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.influencer-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-heavy);
+    border-color: var(--sponsor-color);
+}
+
+.influencer-card:hover::before {
+    transform: scaleX(1);
+}
+
+.influencer-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.influencer-avatar {
+    width: 60px;
+    height: 60px;
+    background: var(--gradient-sponsor);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.influencer-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.influencer-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.influencer-role {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+
+.influencer-niche {
+    display: inline-block;
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--sponsor-color);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.influencer-social {
+    margin-bottom: 20px;
+}
+
+.total-reach {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(16, 185, 129, 0.1);
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.total-reach i {
+    color: var(--sponsor-color);
+    font-size: 1.1rem;
+}
+
+.total-reach span {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.social-platforms {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.social-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--surface-light);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.85rem;
+}
+
+.social-item i {
+    width: 16px;
+    text-align: center;
+}
+
+.social-item i.fa-instagram {
+    color: #E4405F;
+}
+
+.social-item i.fa-youtube {
+    color: #FF0000;
+}
+
+.social-item i.fa-twitter {
+    color: #1DA1F2;
+}
+
+.social-item i.fa-linkedin {
+    color: #0077B5;
+}
+
+.social-item span {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.influencer-bio {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: var(--surface-light);
+    border-radius: 8px;
+    border-left: 4px solid var(--sponsor-color);
+}
+
+.influencer-bio p {
+    color: var(--text-secondary);
+    line-height: 1.5;
+    font-size: 0.9rem;
+    margin: 0;
+    font-style: italic;
+}
+
+.influencer-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    justify-content: center;
+}
+
+.btn-primary {
+    background: var(--gradient-sponsor);
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    flex: 1;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+.btn-secondary {
+    background: var(--surface-light);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border-color: var(--sponsor-color);
+}
+
+/* No Results State */
+.no-results {
+    text-align: center;
+    padding: 60px 20px;
+    background: var(--surface-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-light);
+    margin-top: 30px;
+}
+
+.no-results i {
+    font-size: 4rem;
+    color: var(--sponsor-color);
+    margin-bottom: 25px;
+    opacity: 0.6;
+}
+
+.no-results h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+}
+
+.no-results p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+/* Browse Section */
+.browse-section {
+    background: var(--surface-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 40px;
+    backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-light);
+    text-align: center;
+}
+
+.browse-prompt {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.browse-prompt i {
+    font-size: 3rem;
+    color: var(--sponsor-color);
+    margin-bottom: 25px;
+    opacity: 0.8;
+}
+
+.browse-prompt h3 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+}
+
+.browse-prompt p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+.search-tips {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-top: 25px;
+}
+
+.search-tips li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    padding: 10px 20px;
+    background: var(--surface-light);
+    border-radius: 25px;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.search-tips li i {
+    color: var(--sponsor-color);
+    font-size: 1.1rem;
 }
 
 /* Influencer Details Card */
@@ -553,6 +902,34 @@ body {
     .header-left h1 {
         font-size: 1.5rem;
     }
+    
+    .influencers-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .influencer-card {
+        padding: 20px;
+    }
+    
+    .influencer-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .influencer-avatar {
+        align-self: center;
+    }
+    
+    .social-platforms {
+        grid-template-columns: 1fr;
+    }
+    
+    .search-tips {
+        flex-direction: column;
+        gap: 15px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -563,6 +940,25 @@ body {
     
     .campaign-card {
         padding: 15px;
+    }
+    
+    .influencer-card {
+        padding: 15px;
+    }
+    
+    .influencer-avatar {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+    
+    .influencer-name {
+        font-size: 1.1rem;
+    }
+    
+    .btn {
+        padding: 10px 15px;
+        font-size: 0.85rem;
     }
 }
 

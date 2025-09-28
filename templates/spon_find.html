@@ -101,104 +101,171 @@
                     <i class="fas fa-user-search"></i>
                     Search Influencers
                 </h2>
-                <form action="{{ url_for('sfind') }}" method="GET" class="search-form">
-                    <input type="text" name="search" class="search-input" placeholder="Search influencers by username..." value="{{ search_query }}">
-                    <button type="submit" class="search-btn">
+                <form action="{{ url_for('sfind') }}" method="GET" class="search-form" id="searchForm">
+                    <input type="text" name="search" class="search-input" placeholder="Search by username, niche, or social handle..." value="{{ search_query }}" required>
+                    <button type="submit" class="search-btn" id="searchButton">
                         <i class="fas fa-search"></i>
-                        Search
+                        <span class="btn-text">Search</span>
+                        <i class="fas fa-spinner fa-spin loading-spinner" style="display: none;"></i>
                     </button>
                 </form>
             </div>
             
-            {% if searched_influencer %}
-            <div class="details-card">
-                <h2 class="details-title">
-                    <i class="fas fa-user-circle"></i>
-                    Influencer Profile: {{ searched_influencer.username }}
+            <!-- Search Results Section -->
+            {% if search_query %}
+                {% if searched_influencers %}
+                <div class="search-results-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-search"></i>
+                        Search Results for "{{ search_query }}"
+                        <span class="results-count">({{ searched_influencers|length }} found)</span>
+                    </h2>
+                    
+                    <div class="influencers-grid">
+                        {% for influencer in searched_influencers %}
+                        <div class="influencer-card">
+                            <div class="influencer-header">
+                                <div class="influencer-avatar">
+                                    {{ influencer.username[0].upper() }}
+                                </div>
+                                <div class="influencer-info">
+                                    <h3 class="influencer-name">{{ influencer.username }}</h3>
+                                    <p class="influencer-role">Content Creator</p>
+                                    {% if influencer.niche %}
+                                        <span class="influencer-niche">{{ influencer.niche }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="influencer-social">
+                                {% if influencer.get_total_followers() > 0 %}
+                                <div class="total-reach">
+                                    <i class="fas fa-users"></i>
+                                    <span>{{ "{:,}".format(influencer.get_total_followers()) }} Total Reach</span>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="social-platforms">
+                                    {% if influencer.instagram %}
+                                        <div class="social-item">
+                                            <i class="fab fa-instagram"></i>
+                                            <span>{{ "{:,}".format(influencer.instagram_followers) if influencer.instagram_followers else '0' }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if influencer.youtube %}
+                                        <div class="social-item">
+                                            <i class="fab fa-youtube"></i>
+                                            <span>{{ "{:,}".format(influencer.youtube_subscribers) if influencer.youtube_subscribers else '0' }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if influencer.twitter %}
+                                        <div class="social-item">
+                                            <i class="fab fa-twitter"></i>
+                                            <span>{{ "{:,}".format(influencer.twitter_followers) if influencer.twitter_followers else '0' }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if influencer.linkedin %}
+                                        <div class="social-item">
+                                            <i class="fab fa-linkedin"></i>
+                                            <span>{{ "{:,}".format(influencer.linkedin_connections) if influencer.linkedin_connections else '0' }}</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if influencer.bio %}
+                            <div class="influencer-bio">
+                                <p>{{ influencer.bio[:100] }}{% if influencer.bio|length > 100 %}...{% endif %}</p>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="influencer-actions">
+                                <a href="{{ url_for('sview_influencer_profile', influencer_id=influencer.id, search=search_query) }}" class="btn btn-primary">
+                                    <i class="fas fa-eye"></i>
+                                    View Profile
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="no-results">
+                    <i class="fas fa-search"></i>
+                    <h3>No Influencers Found</h3>
+                    <p>No influencers match your search criteria for "{{ search_query }}"</p>
+                    <p>Try searching by username, niche, or social media handle.</p>
+                </div>
+                {% endif %}
+            {% else %}
+            <!-- Browse Section -->
+            <div class="browse-section">
+                <h2 class="section-title">
+                    <i class="fas fa-compass"></i>
+                    Discover Influencers
                 </h2>
-                <div class="details-grid">
-                    <div class="detail-item">
-                        <i class="fas fa-user"></i>
-                        <span class="detail-label">Username:</span>
-                        <span class="detail-value">{{ searched_influencer.username }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <i class="fas fa-envelope"></i>
-                        <span class="detail-label">Email:</span>
-                        <span class="detail-value">{{ searched_influencer.email }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <i class="fab fa-instagram"></i>
-                        <span class="detail-label">Instagram:</span>
-                        <span class="detail-value">{{ searched_influencer.instagram or 'Not provided' }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <i class="fab fa-linkedin"></i>
-                        <span class="detail-label">LinkedIn:</span>
-                        <span class="detail-value">{{ searched_influencer.linkedin or 'Not provided' }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <i class="fab fa-twitter"></i>
-                        <span class="detail-label">Twitter:</span>
-                        <span class="detail-value">{{ searched_influencer.twitter or 'Not provided' }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <i class="fab fa-youtube"></i>
-                        <span class="detail-label">YouTube:</span>
-                        <span class="detail-value">{{ searched_influencer.youtube or 'Not provided' }}</span>
-                    </div>
+                <div class="browse-prompt">
+                    <i class="fas fa-search"></i>
+                    <h3>Start Your Search</h3>
+                    <p>Use the search bar above to find influencers by:</p>
+                    <ul class="search-tips">
+                        <li><i class="fas fa-user"></i> Username</li>
+                        <li><i class="fas fa-tags"></i> Niche or category</li>
+                        <li><i class="fab fa-instagram"></i> Social media handles</li>
+                    </ul>
                 </div>
             </div>
             {% endif %}
-
-            <!-- Active Campaigns Section -->
-            <h2 class="section-title">
-                <i class="fas fa-bullhorn"></i>
-                Active Campaigns
-            </h2>
-            
-            {% if campaigns %}
-                <div class="campaigns-grid">
-                    {% for campaign in campaigns %}
-                    <div class="campaign-card">
-                        <div class="campaign-header">
-                            <div class="campaign-name">{{ campaign.name }}</div>
-                            <div class="campaign-sponsor">
-                                <i class="fas fa-building"></i>
-                                by {{ campaign.sponsor.username }}
-                            </div>
-                        </div>
-                        <div class="campaign-details">
-                            <div class="campaign-detail">
-                                <span class="label"><i class="fas fa-calendar-start"></i> Start Date:</span>
-                                <span class="value">{{ campaign.start_date }}</span>
-                            </div>
-                            <div class="campaign-detail">
-                                <span class="label"><i class="fas fa-calendar-end"></i> End Date:</span>
-                                <span class="value">{{ campaign.end_date }}</span>
-                            </div>
-                            <div class="campaign-detail">
-                                <span class="label"><i class="fas fa-dollar-sign"></i> Budget:</span>
-                                <span class="value">${{ "{:,.2f}".format(campaign.budget) }}</span>
-                            </div>
-                        </div>
-                        {% if campaign.description %}
-                        <div class="campaign-description">
-                            <i class="fas fa-info-circle"></i>
-                            {{ campaign.description }}
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    <i class="fas fa-bullhorn"></i>
-                    <h3>No Active Campaigns</h3>
-                    <p>There are currently no active campaigns available. Check back later for new opportunities!</p>
-                </div>
-            {% endif %}
         </div>
     </main>
+
+    <script>
+        // Add loading state to search
+        document.getElementById('searchForm').addEventListener('submit', function() {
+            const searchBtn = document.getElementById('searchButton');
+            const btnText = searchBtn.querySelector('.btn-text');
+            const loadingSpinner = searchBtn.querySelector('.loading-spinner');
+            const searchIcon = searchBtn.querySelector('.fa-search');
+            
+            // Show loading state
+            btnText.textContent = 'Searching...';
+            searchIcon.style.display = 'none';
+            loadingSpinner.style.display = 'inline-block';
+            searchBtn.disabled = true;
+        });
+
+        // Add fade-in animation to cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.influencer-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+
+        // Add search suggestions functionality
+        const searchInput = document.querySelector('.search-input');
+        let searchTimeout;
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length >= 2) {
+                searchTimeout = setTimeout(() => {
+                    // Here you could add live search suggestions
+                    console.log('Searching for:', query);
+                }, 300);
+            }
+        });
+
+
+    </script>
 </body>
 </html>

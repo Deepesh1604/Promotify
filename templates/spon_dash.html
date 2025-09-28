@@ -260,8 +260,8 @@
                                 </div>
                             </div>
                             <div class="application-actions">
-                                <a href="{{ url_for('spon_dash', application_id=application.id) }}" class="btn btn-primary">
-                                    <i class="fas fa-eye"></i> View
+                                <a href="{{ url_for('sview_influencer_profile', influencer_id=application.influencer.id, campaign=application.campaign.name) }}" class="btn btn-primary" title="View {{ application.influencer.username }}'s complete profile">
+                                    <i class="fas fa-user"></i> View Profile
                                 </a>
                                 <form action="{{ url_for('accept_application', application_id=application.id) }}" method="POST" style="display: inline;">
                                     <button type="submit" class="btn btn-success">

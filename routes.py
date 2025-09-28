@@ -1926,20 +1926,58 @@ def register_routes(app):
 
     @app.route('/sfind')
     def sfind():
+        if 'sponsor_id' not in session:
+            flash('You need to log in first.', 'error')
+            return redirect(url_for('spon_log'))
+            
         search_query = request.args.get('search', '')
-        searched_influencer = None
+        searched_influencers = []
 
         if search_query:
-            searched_influencer = Influencer.query.filter_by(username=search_query).first()
-
-        influencers = Influencer.query.all()
-        campaigns = Campaign.query.filter(Campaign.end_date >= datetime.now().date()).all()
+            # Search influencers by username, niche, or social media handles
+            searched_influencers = Influencer.query.filter(
+                or_(
+                    Influencer.username.ilike(f'%{search_query}%'),
+                    Influencer.niche.ilike(f'%{search_query}%'),
+                    Influencer.instagram.ilike(f'%{search_query}%'),
+                    Influencer.youtube.ilike(f'%{search_query}%'),
+                    Influencer.twitter.ilike(f'%{search_query}%'),
+                    Influencer.linkedin.ilike(f'%{search_query}%')
+                )
+            ).all()
         
         return render_template('spon_find.html', 
-                               influencers=influencers, 
-                               campaigns=campaigns, 
+                               searched_influencers=searched_influencers, 
+                               search_query=search_query)
+
+    @app.route('/sview_influencer/<int:influencer_id>')
+    def sview_influencer_profile(influencer_id):
+        if 'sponsor_id' not in session:
+            flash('You need to log in first.', 'error')
+            return redirect(url_for('spon_log'))
+            
+        sponsor = Sponsor.query.get(session['sponsor_id'])
+        influencer = Influencer.query.get_or_404(influencer_id)
+        
+        # Get the search query from request args to preserve it for back navigation
+        search_query = request.args.get('search', '')
+        
+        # Get campaign context if coming from dashboard applications
+        campaign_context = request.args.get('campaign', '')
+        
+        # Get sponsor's campaigns for potential collaboration
+        sponsor_campaigns = Campaign.query.filter_by(
+            sponsor_id=sponsor.id
+        ).filter(
+            Campaign.end_date >= datetime.now().date()
+        ).all()
+        
+        return render_template('sponsor_view_influencer.html', 
+                               influencer=influencer,
+                               sponsor=sponsor,
+                               sponsor_campaigns=sponsor_campaigns,
                                search_query=search_query,
-                               searched_influencer=searched_influencer)
+                               campaign_context=campaign_context)
 
     @app.route('/ifind', methods=['GET', 'POST'])
     def ifind():
