@@ -276,6 +276,43 @@ body {
     color: var(--text-secondary);
 }
 
+.user-niche {
+    font-size: 0.7rem;
+    color: var(--influencer-color);
+    background: rgba(249, 115, 22, 0.15);
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-top: 2px;
+    align-self: flex-start;
+    border: 1px solid rgba(249, 115, 22, 0.2);
+}
+
+/* Edit Profile Button */
+.edit-profile-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--gradient-influencer);
+    border-radius: 50%;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+    margin-left: 8px;
+}
+
+.edit-profile-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+    background: linear-gradient(135deg, var(--influencer-dark), var(--influencer-color));
+}
+
+.edit-profile-btn i {
+    font-size: 0.85rem;
+}
+
 /* Content Area */
 .content {
     flex: 1;

@@ -159,6 +159,71 @@ def register_routes(app):
                                total_pending=len(all_pending_applications),
                                total_active=len(all_active_campaigns))
 
+    @app.route('/iedit_profile', methods=['GET', 'POST'])
+    def edit_influencer_profile():
+        if 'influencer_id' not in session:
+            flash('You need to log in first.', 'error')
+            return redirect(url_for('influ_log'))
+        
+        influencer = Influencer.query.get(session['influencer_id'])
+        
+        if request.method == 'POST':
+            try:
+                # Update basic profile information
+                influencer.bio = request.form.get('bio', '').strip()
+                influencer.niche = request.form.get('niche', '').strip()
+                
+                # Handle secondary niches (comma-separated)
+                secondary_niches_str = request.form.get('secondary_niches', '').strip()
+                if secondary_niches_str:
+                    secondary_niches = [niche.strip() for niche in secondary_niches_str.split(',') if niche.strip()]
+                    influencer.set_secondary_niches_list(secondary_niches)
+                else:
+                    influencer.secondary_niches = None
+                
+                # Update social media handles (keep existing for compatibility)
+                influencer.instagram = request.form.get('instagram_handle', '').strip()
+                influencer.youtube = request.form.get('youtube_handle', '').strip()
+                influencer.twitter = request.form.get('twitter_handle', '').strip()
+                influencer.linkedin = request.form.get('linkedin_handle', '').strip()
+                
+                # Update follower counts
+                influencer.instagram_followers = int(request.form.get('instagram_followers', 0) or 0)
+                influencer.youtube_subscribers = int(request.form.get('youtube_subscribers', 0) or 0)
+                influencer.twitter_followers = int(request.form.get('twitter_followers', 0) or 0)
+                influencer.linkedin_connections = int(request.form.get('linkedin_connections', 0) or 0)
+                
+                # Update social media URLs
+                influencer.instagram_url = request.form.get('instagram_url', '').strip()
+                influencer.youtube_url = request.form.get('youtube_url', '').strip()
+                influencer.twitter_url = request.form.get('twitter_url', '').strip()
+                influencer.linkedin_url = request.form.get('linkedin_url', '').strip()
+                
+                # Update engagement rate
+                engagement_rate = request.form.get('engagement_rate', '').strip()
+                if engagement_rate:
+                    influencer.engagement_rate = float(engagement_rate)
+                
+                # Update last profile update timestamp
+                influencer.last_profile_update = datetime.utcnow()
+                
+                db.session.commit()
+                flash('Profile updated successfully!', 'success')
+                return redirect(url_for('influ_dash'))
+                
+            except ValueError as e:
+                flash('Please enter valid numbers for follower counts and engagement rate.', 'error')
+            except Exception as e:
+                db.session.rollback()
+                flash('An error occurred while updating your profile. Please try again.', 'error')
+        
+        # Prepare data for the template
+        secondary_niches_str = ', '.join(influencer.get_secondary_niches_list()) if influencer.secondary_niches else ''
+        
+        return render_template('edit_influencer_profile.html', 
+                               influencer=influencer,
+                               secondary_niches_str=secondary_niches_str)
+
     @app.route('/ilogout')
     def influ_logout():
         session.pop('influencer_id', None)

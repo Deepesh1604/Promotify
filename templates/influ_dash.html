@@ -93,13 +93,164 @@
                         </div>
                     </form>
                 </div>
-                <div class="user-info">
+                <div class="user-info" onclick="toggleProfileCard()" title="Click to view profile details">
                     <div class="user-avatar">
                         {{ influencer.username[0].upper() if influencer and influencer.username else 'I' }}
                     </div>
                     <div class="user-details">
                         <span class="user-name">{{ influencer.username if influencer else 'Influencer' }}</span>
                         <span class="user-role">Content Creator</span>
+                        {% if influencer.niche %}
+                            <span class="user-niche">{{ influencer.niche }}</span>
+                        {% endif %}
+                    </div>
+                    <a href="{{ url_for('edit_influencer_profile') }}" class="edit-profile-btn" title="Edit Profile" onclick="event.stopPropagation();">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                </div>
+
+                <!-- Profile Card Modal -->
+                <div class="profile-card-overlay" id="profileCardOverlay" onclick="closeProfileCard()">
+                    <div class="profile-card" onclick="event.stopPropagation();">
+                        <div class="profile-card-header">
+                            <div class="profile-card-avatar">
+                                {{ influencer.username[0].upper() if influencer and influencer.username else 'I' }}
+                            </div>
+                            <div class="profile-card-info">
+                                <h3 class="profile-card-name">{{ influencer.username if influencer else 'Influencer' }}</h3>
+                                <p class="profile-card-role">Content Creator</p>
+                                {% if influencer.niche %}
+                                    <span class="profile-card-niche">{{ influencer.niche }}</span>
+                                {% endif %}
+                            </div>
+                            <button class="profile-card-close" onclick="closeProfileCard()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+
+                        <div class="profile-card-body">
+                            <div class="social-media-section">
+                                <h4><i class="fas fa-share-alt"></i> Social Media Presence</h4>
+                                <div class="social-platforms">
+                                    {% if influencer.instagram_followers or influencer.instagram %}
+                                    <div class="social-platform">
+                                        <div class="platform-info">
+                                            <i class="fab fa-instagram"></i>
+                                            <span class="platform-name">Instagram</span>
+                                        </div>
+                                        <div class="platform-stats">
+                                            {% if influencer.instagram %}
+                                                <span class="platform-username">@{{ influencer.instagram }}</span>
+                                            {% endif %}
+                                            <span class="follower-count">
+                                                <i class="fas fa-users"></i>
+                                                {{ "{:,}".format(influencer.instagram_followers) if influencer.instagram_followers else '0' }} followers
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    {% if influencer.youtube_subscribers or influencer.youtube %}
+                                    <div class="social-platform">
+                                        <div class="platform-info">
+                                            <i class="fab fa-youtube"></i>
+                                            <span class="platform-name">YouTube</span>
+                                        </div>
+                                        <div class="platform-stats">
+                                            {% if influencer.youtube %}
+                                                <span class="platform-username">@{{ influencer.youtube }}</span>
+                                            {% endif %}
+                                            <span class="follower-count">
+                                                <i class="fas fa-users"></i>
+                                                {{ "{:,}".format(influencer.youtube_subscribers) if influencer.youtube_subscribers else '0' }} subscribers
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    {% if influencer.twitter_followers or influencer.twitter %}
+                                    <div class="social-platform">
+                                        <div class="platform-info">
+                                            <i class="fab fa-twitter"></i>
+                                            <span class="platform-name">Twitter</span>
+                                        </div>
+                                        <div class="platform-stats">
+                                            {% if influencer.twitter %}
+                                                <span class="platform-username">@{{ influencer.twitter }}</span>
+                                            {% endif %}
+                                            <span class="follower-count">
+                                                <i class="fas fa-users"></i>
+                                                {{ "{:,}".format(influencer.twitter_followers) if influencer.twitter_followers else '0' }} followers
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    {% if influencer.linkedin_connections or influencer.linkedin %}
+                                    <div class="social-platform">
+                                        <div class="platform-info">
+                                            <i class="fab fa-linkedin"></i>
+                                            <span class="platform-name">LinkedIn</span>
+                                        </div>
+                                        <div class="platform-stats">
+                                            {% if influencer.linkedin %}
+                                                <span class="platform-username">@{{ influencer.linkedin }}</span>
+                                            {% endif %}
+                                            <span class="follower-count">
+                                                <i class="fas fa-users"></i>
+                                                {{ "{:,}".format(influencer.linkedin_connections) if influencer.linkedin_connections else '0' }} connections
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    {% if not (influencer.instagram or influencer.youtube or influencer.twitter or influencer.linkedin) %}
+                                    <div class="no-social-platforms">
+                                        <i class="fas fa-plus-circle"></i>
+                                        <p>No social media platforms added yet</p>
+                                        <small>Add your social media accounts to showcase your reach</small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {% if influencer.get_total_followers() > 0 %}
+                            <div class="total-reach-section">
+                                <div class="total-reach">
+                                    <i class="fas fa-chart-line"></i>
+                                    <div class="reach-info">
+                                        <span class="reach-label">Total Reach</span>
+                                        <span class="reach-number">{{ "{:,}".format(influencer.get_total_followers()) }}</span>
+                                    </div>
+                                </div>
+                                {% if influencer.engagement_rate %}
+                                <div class="engagement-rate">
+                                    <i class="fas fa-heart"></i>
+                                    <div class="engagement-info">
+                                        <span class="engagement-label">Avg. Engagement</span>
+                                        <span class="engagement-number">{{ "%.1f"|format(influencer.engagement_rate) }}%</span>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+
+                            {% if influencer.bio %}
+                            <div class="bio-section">
+                                <h4><i class="fas fa-user"></i> Bio</h4>
+                                <p class="bio-text">{{ influencer.bio }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="profile-card-footer">
+                            <a href="{{ url_for('edit_influencer_profile') }}" class="btn btn-primary">
+                                <i class="fas fa-edit"></i> Edit Profile
+                            </a>
+                            <button class="btn btn-secondary" onclick="closeProfileCard()">
+                                <i class="fas fa-times"></i> Close
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -575,6 +726,444 @@ document.getElementById('campaign-search').addEventListener('keypress', function
         align-items: center;
         gap: 1.5rem;
     }
+
+    /* User Info - Make clickable */
+    .user-info {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-radius: 12px;
+        padding: 0.5rem;
+    }
+
+    .user-info:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: scale(1.02);
+    }
+
+    /* Profile Card Styles */
+    .profile-card-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        padding: 20px;
+        box-sizing: border-box;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .profile-card-overlay.show {
+        display: flex;
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .profile-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 380px;
+        max-height: calc(100vh - 40px);
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        margin: auto;
+        position: relative;
+        transform: scale(0.9) translateY(20px);
+        transition: transform 0.3s ease;
+    }
+
+    .profile-card-overlay.show .profile-card {
+        transform: scale(1) translateY(0);
+    }
+
+    .profile-card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1.25rem;
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        color: white;
+        border-radius: 16px 16px 0 0;
+        position: relative;
+    }
+
+    .profile-card-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        flex-shrink: 0;
+    }
+
+    .profile-card-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .profile-card-name {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin: 0 0 0.2rem 0;
+        line-height: 1.2;
+    }
+
+    .profile-card-role {
+        font-size: 0.85rem;
+        opacity: 0.9;
+        margin: 0 0 0.2rem 0;
+    }
+
+    .profile-card-niche {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.2rem 0.6rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .profile-card-close {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+    .profile-card-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+    }
+
+    .profile-card-body {
+        padding: 1.25rem;
+        color: #333;
+    }
+
+    .social-media-section h4,
+    .bio-section h4 {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin: 0 0 0.75rem 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #f97316;
+    }
+
+    .social-platforms {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .social-platform {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.6rem 0.75rem;
+        background: rgba(249, 115, 22, 0.05);
+        border: 1px solid rgba(249, 115, 22, 0.1);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .social-platform:hover {
+        background: rgba(249, 115, 22, 0.1);
+        transform: translateX(5px);
+    }
+
+    .platform-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
+    }
+
+    .platform-info i {
+        font-size: 1.1rem;
+        width: 20px;
+        text-align: center;
+    }
+
+    .fab.fa-instagram { color: #E4405F; }
+    .fab.fa-youtube { color: #FF0000; }
+    .fab.fa-twitter { color: #1DA1F2; }
+    .fab.fa-linkedin { color: #0077B5; }
+
+    .platform-name {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #333;
+    }
+
+    .platform-stats {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.25rem;
+    }
+
+    .platform-username {
+        font-size: 0.85rem;
+        color: #666;
+        font-style: italic;
+    }
+
+    .follower-count {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #f97316;
+    }
+
+    .follower-count i {
+        font-size: 0.8rem;
+    }
+
+    .no-social-platforms {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: #666;
+    }
+
+    .no-social-platforms i {
+        font-size: 2rem;
+        color: #ddd;
+        margin-bottom: 0.5rem;
+    }
+
+    .no-social-platforms p {
+        margin: 0.5rem 0 0.25rem 0;
+        font-weight: 500;
+    }
+
+    .no-social-platforms small {
+        color: #999;
+    }
+
+    .total-reach-section {
+        display: flex;
+        gap: 1rem;
+        margin: 1.5rem 0;
+        padding: 1rem;
+        background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(234, 88, 12, 0.1));
+        border-radius: 12px;
+        border: 1px solid rgba(249, 115, 22, 0.2);
+    }
+
+    .total-reach,
+    .engagement-rate {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
+    }
+
+    .total-reach i,
+    .engagement-rate i {
+        font-size: 1.5rem;
+        color: #f97316;
+    }
+
+    .reach-info,
+    .engagement-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .reach-label,
+    .engagement-label {
+        font-size: 0.8rem;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .reach-number,
+    .engagement-number {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #f97316;
+    }
+
+    .bio-section {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .bio-text {
+        line-height: 1.6;
+        color: #555;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .profile-card-footer {
+        padding: 0.75rem 1.25rem 1.25rem;
+        display: flex;
+        gap: 0.6rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-card-footer .btn {
+        flex: 1;
+        padding: 0.6rem 0.75rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 0.85rem;
+    }
+
+    .profile-card-footer .btn-primary {
+        background: linear-gradient(135deg, #f97316, #ea580c);
+        color: white;
+    }
+
+    .profile-card-footer .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(249, 115, 22, 0.3);
+    }
+
+    .profile-card-footer .btn-secondary {
+        background: rgba(108, 117, 125, 0.1);
+        color: #6c757d;
+        border: 1px solid rgba(108, 117, 125, 0.3);
+    }
+
+    .profile-card-footer .btn-secondary:hover {
+        background: rgba(108, 117, 125, 0.2);
+        transform: translateY(-2px);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Responsive Design for Profile Card */
+    @media (max-width: 640px) {
+        .profile-card-overlay {
+            padding: 15px;
+        }
+        
+        .profile-card {
+            max-width: calc(100vw - 30px);
+            max-height: calc(100vh - 30px);
+        }
+
+        .profile-card-header {
+            padding: 1rem;
+        }
+
+        .profile-card-avatar {
+            width: 45px;
+            height: 45px;
+            font-size: 1.3rem;
+        }
+
+        .profile-card-name {
+            font-size: 1.1rem;
+        }
+
+        .profile-card-body {
+            padding: 1rem;
+        }
+
+        .social-platform {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.4rem;
+            padding: 0.5rem;
+        }
+
+        .platform-stats {
+            align-items: flex-start;
+        }
+
+        .total-reach-section {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .profile-card-footer {
+            flex-direction: column;
+            padding: 0.75rem 1rem 1rem;
+        }
+    }
+
+        .profile-card-header {
+            padding: 1.25rem;
+        }
+
+        .profile-card-avatar {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+        }
+
+        .profile-card-name {
+            font-size: 1.2rem;
+        }
+
+        .profile-card-body {
+            padding: 1.25rem;
+        }
+
+        .social-platform {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.5rem;
+        }
+
+        .platform-stats {
+            align-items: flex-start;
+        }
+
+        .total-reach-section {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .profile-card-footer {
+            flex-direction: column;
+            padding: 0.75rem 1rem 1rem;
+        }
+    }
     
     /* Quick Search Bar */
     .search-bar {
@@ -965,42 +1554,122 @@ document.getElementById('campaign-search').addEventListener('keypress', function
         }
     }, 10000);
     
+    // Profile Card Functions
+    function toggleProfileCard() {
+        const overlay = document.getElementById('profileCardOverlay');
+        if (overlay && overlay.classList.contains('show')) {
+            closeProfileCard();
+        } else {
+            openProfileCard();
+        }
+    }
+
+    function openProfileCard() {
+        const overlay = document.getElementById('profileCardOverlay');
+        if (!overlay) return;
+        
+        // Show overlay and add show class
+        overlay.style.display = 'flex';
+        // Force a reflow before adding the show class for smooth animation
+        overlay.offsetHeight;
+        overlay.classList.add('show');
+        
+        // Prevent background scrolling
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeProfileCard() {
+        const overlay = document.getElementById('profileCardOverlay');
+        if (!overlay) return;
+        
+        // Remove show class for exit animation
+        overlay.classList.remove('show');
+        
+        // Wait for animation to complete before hiding
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 300);
+        
+        // Restore scrolling
+        document.body.style.overflow = '';
+    }
+
     // Quick search functionality
     document.addEventListener('DOMContentLoaded', function() {
         const searchForm = document.querySelector('.quick-search-form');
         const searchInput = document.querySelector('.quick-search-input');
         
-        // Add search shortcut (Ctrl/Cmd + K)
+        // Profile card keyboard shortcuts
         document.addEventListener('keydown', function(event) {
+            // Close profile card with Escape key
+            if (event.key === 'Escape') {
+                const overlay = document.getElementById('profileCardOverlay');
+                if (overlay.classList.contains('show')) {
+                    closeProfileCard();
+                }
+            }
+            
+            // Search shortcut (Ctrl/Cmd + K)
             if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
                 event.preventDefault();
                 searchInput.focus();
             }
+
+            // Profile card shortcut (Ctrl/Cmd + P)
+            if ((event.ctrlKey || event.metaKey) && event.key === 'p') {
+                event.preventDefault();
+                toggleProfileCard();
+            }
         });
         
         // Add loading state to search button
-        searchForm.addEventListener('submit', function() {
-            const searchBtn = this.querySelector('.search-btn');
-            const originalHTML = searchBtn.innerHTML;
-            searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            searchBtn.disabled = true;
-            
-            // Reset after 3 seconds (in case of slow navigation)
-            setTimeout(() => {
-                searchBtn.innerHTML = originalHTML;
-                searchBtn.disabled = false;
-            }, 3000);
-        });
+        if (searchForm) {
+            searchForm.addEventListener('submit', function() {
+                const searchBtn = this.querySelector('.search-btn');
+                const originalHTML = searchBtn.innerHTML;
+                searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                searchBtn.disabled = true;
+                
+                // Reset after 3 seconds (in case of slow navigation)
+                setTimeout(() => {
+                    searchBtn.innerHTML = originalHTML;
+                    searchBtn.disabled = false;
+                }, 3000);
+            });
+        }
         
         // Add search suggestions (optional enhancement)
-        searchInput.addEventListener('input', function() {
-            const value = this.value.trim();
-            if (value.length > 0) {
-                this.setAttribute('title', `Press Enter to search for "${value}"`);
-            } else {
-                this.setAttribute('title', 'Search for campaigns and sponsors');
-            }
-        });
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const value = this.value.trim();
+                if (value.length > 0) {
+                    this.setAttribute('title', `Press Enter to search for "${value}"`);
+                } else {
+                    this.setAttribute('title', 'Search for campaigns and sponsors');
+                }
+            });
+        }
+
+        // Initialize profile card - ensure it's hidden
+        const profileCardOverlay = document.getElementById('profileCardOverlay');
+        if (profileCardOverlay) {
+            profileCardOverlay.style.display = 'none';
+            profileCardOverlay.classList.remove('show');
+        }
+
+        // Add smooth scrolling for profile card if content overflows
+        const profileCard = document.querySelector('.profile-card');
+        if (profileCard) {
+            profileCard.addEventListener('scroll', function() {
+                const scrollTop = this.scrollTop;
+                const header = this.querySelector('.profile-card-header');
+                if (scrollTop > 20) {
+                    header.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+                } else {
+                    header.style.boxShadow = 'none';
+                }
+            });
+        }
     });
     </script>
 </body>

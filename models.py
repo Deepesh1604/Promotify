@@ -8,17 +8,70 @@ class Influencer(db.Model):
     username = db.Column(db.String(15), unique=True, nullable=False)
     email = db.Column(db.String(30), unique=True, nullable=False)
     password = db.Column(db.String(10), nullable=False)
+    
+    # Basic social media handles (existing - for backward compatibility)
     instagram = db.Column(db.String(15), unique=True, nullable=True)
     linkedin = db.Column(db.String(20), unique=True, nullable=True)
     twitter = db.Column(db.String(20), unique=True, nullable=True)
     youtube = db.Column(db.String(20), unique=True, nullable=True)
+    
+    # Enhanced Profile Information
+    bio = db.Column(db.Text, nullable=True)
+    niche = db.Column(db.String(100), nullable=True)  # Primary niche
+    secondary_niches = db.Column(db.String(200), nullable=True)  # JSON string for multiple niches
+    
+    # Social Media Follower Counts
+    instagram_followers = db.Column(db.Integer, default=0)
+    youtube_subscribers = db.Column(db.Integer, default=0)
+    twitter_followers = db.Column(db.Integer, default=0)
+    linkedin_connections = db.Column(db.Integer, default=0)
+    
+    # Social Media URLs (full URLs instead of just handles)
+    instagram_url = db.Column(db.String(200), nullable=True)
+    youtube_url = db.Column(db.String(200), nullable=True)
+    twitter_url = db.Column(db.String(200), nullable=True)
+    linkedin_url = db.Column(db.String(200), nullable=True)
+    
+    # Profile Metrics
+    engagement_rate = db.Column(db.Float, default=0.0)  # Average engagement rate
+    profile_verified = db.Column(db.Boolean, default=False)
+    profile_picture = db.Column(db.String(200), nullable=True)  # Path to profile picture
+    last_profile_update = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Financial Information
     wallet_balance = db.Column(db.Float, default=0.0, nullable=False)
     bank_account = db.Column(db.String(20), nullable=True)
     ifsc_code = db.Column(db.String(11), nullable=True)
+    
+    # Timestamps
     date_joined = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
     campaigns = db.relationship('Campaign', secondary='application', 
                                 primaryjoin="and_(Influencer.id==Application.influencer_id, Application.status=='accepted')",
                                 backref=db.backref('accepted_influencers', lazy='dynamic'))
+    
+    def get_total_followers(self):
+        """Calculate total followers across all platforms"""
+        return sum([
+            self.instagram_followers or 0,
+            self.youtube_subscribers or 0,
+            self.twitter_followers or 0,
+            self.linkedin_connections or 0
+        ])
+    
+    def get_secondary_niches_list(self):
+        """Get secondary niches as a list"""
+        import json
+        try:
+            return json.loads(self.secondary_niches) if self.secondary_niches else []
+        except:
+            return []
+    
+    def set_secondary_niches_list(self, niches_list):
+        """Set secondary niches from a list"""
+        import json
+        self.secondary_niches = json.dumps(niches_list) if niches_list else None
 
 class Sponsor(db.Model):
     id = db.Column(db.Integer, primary_key=True)

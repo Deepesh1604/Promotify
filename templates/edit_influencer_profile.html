@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Promotify</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/edit_profile.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Background -->
+    <div class="background">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='images/promotify.png') }}" alt="Promotify">
+                <span class="logo-text">Promotify</span>
+            </div>
+            <div class="influencer-badge">
+                <i class="fas fa-star"></i>
+                <span>Influencer Portal</span>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="nav-item">
+                    <a href="{{ url_for('influ_dash') }}" class="nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('influencer_wallet') }}" class="nav-link">
+                        <i class="fas fa-wallet"></i>
+                        <span>Wallet</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('ifind') }}" class="nav-link">
+                        <i class="fas fa-search"></i>
+                        <span>Find Campaigns</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('influencer_history') }}" class="nav-link">
+                        <i class="fas fa-history"></i>
+                        <span>History</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('influ_stats') }}" class="nav-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item logout">
+                    <a href="{{ url_for('influ_logout') }}" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Content Header -->
+        <div class="content-header">
+            <div class="header-left">
+                <h1><i class="fas fa-user-edit"></i> Edit Profile</h1>
+                <p class="header-subtitle">Update your profile information and social media details</p>
+            </div>
+            <div class="header-right">
+                <a href="{{ url_for('influ_dash') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">
+                            <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                            {{ message }}
+                            <button class="close-flash" onclick="this.parentElement.remove()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="content">
+            <form method="POST" class="profile-form">
+                <!-- Basic Information Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-user"></i> Basic Information</h2>
+                        <p class="section-description">Tell us about yourself and your content niche</p>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="bio"><i class="fas fa-pen"></i> Bio</label>
+                            <textarea id="bio" name="bio" rows="4" placeholder="Tell your audience about yourself, your content style, and what makes you unique..." maxlength="500">{{ influencer.bio or '' }}</textarea>
+                            <div class="char-counter">
+                                <span id="bio-count">{{ (influencer.bio or '')|length }}</span>/500 characters
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="niche"><i class="fas fa-tags"></i> Primary Niche</label>
+                            <select id="niche" name="niche" required>
+                                <option value="">Select your primary niche</option>
+                                <option value="Fashion" {{ 'selected' if influencer.niche == 'Fashion' }}>Fashion & Style</option>
+                                <option value="Beauty" {{ 'selected' if influencer.niche == 'Beauty' }}>Beauty & Skincare</option>
+                                <option value="Fitness" {{ 'selected' if influencer.niche == 'Fitness' }}>Fitness & Health</option>
+                                <option value="Technology" {{ 'selected' if influencer.niche == 'Technology' }}>Technology</option>
+                                <option value="Gaming" {{ 'selected' if influencer.niche == 'Gaming' }}>Gaming</option>
+                                <option value="Food" {{ 'selected' if influencer.niche == 'Food' }}>Food & Cooking</option>
+                                <option value="Travel" {{ 'selected' if influencer.niche == 'Travel' }}>Travel & Adventure</option>
+                                <option value="Lifestyle" {{ 'selected' if influencer.niche == 'Lifestyle' }}>Lifestyle</option>
+                                <option value="Business" {{ 'selected' if influencer.niche == 'Business' }}>Business & Finance</option>
+                                <option value="Education" {{ 'selected' if influencer.niche == 'Education' }}>Education</option>
+                                <option value="Entertainment" {{ 'selected' if influencer.niche == 'Entertainment' }}>Entertainment</option>
+                                <option value="Music" {{ 'selected' if influencer.niche == 'Music' }}>Music</option>
+                                <option value="Art" {{ 'selected' if influencer.niche == 'Art' }}>Art & Design</option>
+                                <option value="Sports" {{ 'selected' if influencer.niche == 'Sports' }}>Sports</option>
+                                <option value="Automotive" {{ 'selected' if influencer.niche == 'Automotive' }}>Automotive</option>
+                                <option value="Photography" {{ 'selected' if influencer.niche == 'Photography' }}>Photography</option>
+                                <option value="Parenting" {{ 'selected' if influencer.niche == 'Parenting' }}>Parenting & Family</option>
+                                <option value="Pet" {{ 'selected' if influencer.niche == 'Pet' }}>Pets & Animals</option>
+                                <option value="Other" {{ 'selected' if influencer.niche == 'Other' }}>Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="secondary_niches"><i class="fas fa-plus-circle"></i> Secondary Niches</label>
+                            <input type="text" id="secondary_niches" name="secondary_niches" 
+                                   value="{{ secondary_niches_str }}" 
+                                   placeholder="e.g., Technology, Lifestyle, Fashion (comma-separated)">
+                            <div class="form-help">Enter additional niches separated by commas</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="engagement_rate"><i class="fas fa-chart-line"></i> Engagement Rate (%)</label>
+                            <input type="number" id="engagement_rate" name="engagement_rate" 
+                                   value="{{ influencer.engagement_rate or '' }}" 
+                                   step="0.1" min="0" max="100" placeholder="e.g., 4.5">
+                            <div class="form-help">Average engagement rate across your posts</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instagram Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <h2><i class="fab fa-instagram"></i> Instagram</h2>
+                        <p class="section-description">Your Instagram profile details</p>
+                    </div>
+                    
+                    <div class="form-grid social-grid">
+                        <div class="form-group">
+                            <label for="instagram_handle"><i class="fas fa-at"></i> Username</label>
+                            <input type="text" id="instagram_handle" name="instagram_handle" 
+                                   value="{{ influencer.instagram or '' }}" 
+                                   placeholder="your_username">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="instagram_followers"><i class="fas fa-users"></i> Followers</label>
+                            <input type="number" id="instagram_followers" name="instagram_followers" 
+                                   value="{{ influencer.instagram_followers or '' }}" 
+                                   min="0" placeholder="10000">
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="instagram_url"><i class="fas fa-link"></i> Profile URL</label>
+                            <input type="url" id="instagram_url" name="instagram_url" 
+                                   value="{{ influencer.instagram_url or '' }}" 
+                                   placeholder="https://instagram.com/your_username">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- YouTube Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <h2><i class="fab fa-youtube"></i> YouTube</h2>
+                        <p class="section-description">Your YouTube channel information</p>
+                    </div>
+                    
+                    <div class="form-grid social-grid">
+                        <div class="form-group">
+                            <label for="youtube_handle"><i class="fas fa-at"></i> Channel Name</label>
+                            <input type="text" id="youtube_handle" name="youtube_handle" 
+                                   value="{{ influencer.youtube or '' }}" 
+                                   placeholder="Your Channel Name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="youtube_subscribers"><i class="fas fa-users"></i> Subscribers</label>
+                            <input type="number" id="youtube_subscribers" name="youtube_subscribers" 
+                                   value="{{ influencer.youtube_subscribers or '' }}" 
+                                   min="0" placeholder="5000">
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="youtube_url"><i class="fas fa-link"></i> Channel URL</label>
+                            <input type="url" id="youtube_url" name="youtube_url" 
+                                   value="{{ influencer.youtube_url or '' }}" 
+                                   placeholder="https://youtube.com/@yourchannel">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Twitter Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <h2><i class="fab fa-twitter"></i> Twitter</h2>
+                        <p class="section-description">Your Twitter profile details</p>
+                    </div>
+                    
+                    <div class="form-grid social-grid">
+                        <div class="form-group">
+                            <label for="twitter_handle"><i class="fas fa-at"></i> Handle</label>
+                            <input type="text" id="twitter_handle" name="twitter_handle" 
+                                   value="{{ influencer.twitter or '' }}" 
+                                   placeholder="your_handle">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="twitter_followers"><i class="fas fa-users"></i> Followers</label>
+                            <input type="number" id="twitter_followers" name="twitter_followers" 
+                                   value="{{ influencer.twitter_followers or '' }}" 
+                                   min="0" placeholder="8000">
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="twitter_url"><i class="fas fa-link"></i> Profile URL</label>
+                            <input type="url" id="twitter_url" name="twitter_url" 
+                                   value="{{ influencer.twitter_url or '' }}" 
+                                   placeholder="https://twitter.com/your_handle">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LinkedIn Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <h2><i class="fab fa-linkedin"></i> LinkedIn</h2>
+                        <p class="section-description">Your LinkedIn profile information</p>
+                    </div>
+                    
+                    <div class="form-grid social-grid">
+                        <div class="form-group">
+                            <label for="linkedin_handle"><i class="fas fa-at"></i> Profile Name</label>
+                            <input type="text" id="linkedin_handle" name="linkedin_handle" 
+                                   value="{{ influencer.linkedin or '' }}" 
+                                   placeholder="Your Name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="linkedin_connections"><i class="fas fa-users"></i> Connections</label>
+                            <input type="number" id="linkedin_connections" name="linkedin_connections" 
+                                   value="{{ influencer.linkedin_connections or '' }}" 
+                                   min="0" placeholder="500+">
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="linkedin_url"><i class="fas fa-link"></i> Profile URL</label>
+                            <input type="url" id="linkedin_url" name="linkedin_url" 
+                                   value="{{ influencer.linkedin_url or '' }}" 
+                                   placeholder="https://linkedin.com/in/your-profile">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Profile
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        // Character counter for bio
+        const bioTextarea = document.getElementById('bio');
+        const bioCounter = document.getElementById('bio-count');
+        
+        bioTextarea.addEventListener('input', function() {
+            const count = this.value.length;
+            bioCounter.textContent = count;
+            
+            if (count > 450) {
+                bioCounter.style.color = '#ff6b6b';
+            } else if (count > 400) {
+                bioCounter.style.color = '#ffa726';
+            } else {
+                bioCounter.style.color = 'var(--text-secondary)';
+            }
+        });
+        
+        // URL validation and auto-formatting
+        const urlInputs = document.querySelectorAll('input[type="url"]');
+        urlInputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                let value = this.value.trim();
+                if (value && !value.startsWith('http://') && !value.startsWith('https://')) {
+                    this.value = 'https://' + value;
+                }
+            });
+        });
+        
+        // Form validation
+        document.querySelector('.profile-form').addEventListener('submit', function(e) {
+            const requiredFields = this.querySelectorAll('[required]');
+            let isValid = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('error');
+                    isValid = false;
+                } else {
+                    field.classList.remove('error');
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+            }
+        });
+        
+        // Auto-dismiss flash messages
+        setTimeout(() => {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(message => {
+                message.style.opacity = '0';
+                setTimeout(() => message.remove(), 300);
+            });
+        }, 5000);
+        
+        // Number input formatting
+        const numberInputs = document.querySelectorAll('input[type="number"]');
+        numberInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.value < 0) {
+                    this.value = 0;
+                }
+            });
+        });
+        
+        // Save draft functionality
+        function saveDraft() {
+            const formData = new FormData(document.querySelector('.profile-form'));
+            const draftData = {};
+            
+            for (let [key, value] of formData.entries()) {
+                draftData[key] = value;
+            }
+            
+            localStorage.setItem('profileDraft', JSON.stringify(draftData));
+            
+            // Show temporary save indicator
+            const saveIndicator = document.createElement('div');
+            saveIndicator.textContent = 'Draft saved';
+            saveIndicator.className = 'save-indicator';
+            document.body.appendChild(saveIndicator);
+            
+            setTimeout(() => {
+                saveIndicator.remove();
+            }, 2000);
+        }
+        
+        // Auto-save draft every 30 seconds
+        setInterval(saveDraft, 30000);
+        
+        // Load draft on page load
+        window.addEventListener('load', function() {
+            const savedDraft = localStorage.getItem('profileDraft');
+            if (savedDraft) {
+                try {
+                    const draftData = JSON.parse(savedDraft);
+                    Object.keys(draftData).forEach(key => {
+                        const field = document.querySelector(`[name="${key}"]`);
+                        if (field && !field.value) {
+                            field.value = draftData[key];
+                        }
+                    });
+                } catch (e) {
+                    console.log('Could not load draft');
+                }
+            }
+        });
+        
+        // Clear draft on successful submit
+        document.querySelector('.profile-form').addEventListener('submit', function() {
+            localStorage.removeItem('profileDraft');
+        });
+    </script>
+</body>
+</html>
