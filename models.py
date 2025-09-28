@@ -141,3 +141,20 @@ class Payment(db.Model):
     
     def __repr__(self):
         return f"<Payment {self.id}: {self.sponsor.username} -> {self.influencer.username} ${self.amount}>"
+
+class CampaignInvitation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sponsor_id = db.Column(db.Integer, db.ForeignKey('sponsor.id', ondelete='CASCADE'), nullable=False)
+    influencer_id = db.Column(db.Integer, db.ForeignKey('influencer.id', ondelete='CASCADE'), nullable=False)
+    campaign_id = db.Column(db.Integer, db.ForeignKey('campaign.id', ondelete='CASCADE'), nullable=False)
+    status = db.Column(db.String(20), default='pending')  # 'pending', 'accepted', 'declined'
+    message = db.Column(db.Text, nullable=True)  # Optional invitation message from sponsor
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    responded_at = db.Column(db.DateTime, nullable=True)
+    
+    sponsor = db.relationship('Sponsor', backref=db.backref('invitations_sent', lazy=True))
+    influencer = db.relationship('Influencer', backref=db.backref('invitations_received', lazy=True))
+    campaign = db.relationship('Campaign', backref=db.backref('invitations', lazy=True))
+    
+    def __repr__(self):
+        return f"<CampaignInvitation {self.id}: {self.sponsor.username} -> {self.influencer.username} for {self.campaign.name}>"

@@ -1,5 +1,5 @@
 from flask import render_template, redirect, url_for, request, flash, session, make_response
-from models import db, Influencer, Sponsor, Campaign, Application, WalletTransaction, Payment
+from models import db, Influencer, Sponsor, Campaign, Application, WalletTransaction, Payment, CampaignInvitation
 from datetime import datetime, timedelta
 from sqlalchemy import func, or_
 import sqlalchemy
@@ -1930,6 +1930,7 @@ def register_routes(app):
             flash('You need to log in first.', 'error')
             return redirect(url_for('spon_log'))
             
+        sponsor_id = session['sponsor_id']
         search_query = request.args.get('search', '')
         searched_influencers = []
 
@@ -1946,9 +1947,17 @@ def register_routes(app):
                 )
             ).all()
         
+        # Get sponsor's active campaigns for invitation modal
+        sponsor_campaigns = Campaign.query.filter_by(
+            sponsor_id=sponsor_id
+        ).filter(
+            Campaign.end_date >= datetime.now().date()
+        ).all()
+        
         return render_template('spon_find.html', 
                                searched_influencers=searched_influencers, 
-                               search_query=search_query)
+                               search_query=search_query,
+                               sponsor_campaigns=sponsor_campaigns)
 
     @app.route('/sview_influencer/<int:influencer_id>')
     def sview_influencer_profile(influencer_id):
@@ -1972,12 +1981,225 @@ def register_routes(app):
             Campaign.end_date >= datetime.now().date()
         ).all()
         
+        # Get existing invitations and applications for this influencer
+        campaign_status = {}
+        for campaign in sponsor_campaigns:
+            # Check for existing invitation
+            existing_invitation = CampaignInvitation.query.filter_by(
+                sponsor_id=sponsor.id,
+                influencer_id=influencer_id,
+                campaign_id=campaign.id
+            ).first()
+            
+            # Check for existing application
+            existing_application = Application.query.filter_by(
+                influencer_id=influencer_id,
+                campaign_id=campaign.id
+            ).first()
+            
+            campaign_status[campaign.id] = {
+                'invitation': existing_invitation,
+                'application': existing_application,
+                'can_invite': not existing_invitation and not existing_application
+            }
+        
         return render_template('sponsor_view_influencer.html', 
                                influencer=influencer,
                                sponsor=sponsor,
                                sponsor_campaigns=sponsor_campaigns,
+                               campaign_status=campaign_status,
                                search_query=search_query,
                                campaign_context=campaign_context)
+
+    @app.route('/send_invitation', methods=['POST'])
+    def send_invitation():
+        if 'sponsor_id' not in session:
+            flash('You need to log in first.', 'error')
+            return redirect(url_for('spon_log'))
+        
+        sponsor_id = session['sponsor_id']
+        influencer_id = request.form.get('influencer_id')
+        campaign_id = request.form.get('campaign_id')
+        message = request.form.get('message', '')
+        
+        # Validate input
+        if not influencer_id or not campaign_id:
+            flash('Invalid invitation request.', 'error')
+            return redirect(request.referrer or url_for('sfind'))
+        
+        # Check if campaign belongs to sponsor
+        campaign = Campaign.query.filter_by(id=campaign_id, sponsor_id=sponsor_id).first()
+        if not campaign:
+            flash('You can only send invitations for your own campaigns.', 'error')
+            return redirect(request.referrer or url_for('sfind'))
+        
+        # Check if invitation already exists
+        existing_invitation = CampaignInvitation.query.filter_by(
+            sponsor_id=sponsor_id,
+            influencer_id=influencer_id,
+            campaign_id=campaign_id
+        ).first()
+        
+        if existing_invitation:
+            if existing_invitation.status == 'pending':
+                flash('You have already sent an invitation to this influencer for this campaign.', 'warning')
+            else:
+                flash(f'This influencer has already {existing_invitation.status} your previous invitation.', 'info')
+            return redirect(request.referrer or url_for('sfind'))
+        
+        # Check if influencer has already applied to this campaign
+        existing_application = Application.query.filter_by(
+            influencer_id=influencer_id,
+            campaign_id=campaign_id
+        ).first()
+        
+        if existing_application:
+            flash('This influencer has already applied to this campaign.', 'info')
+            return redirect(request.referrer or url_for('sfind'))
+        
+        # Create invitation
+        try:
+            invitation = CampaignInvitation(
+                sponsor_id=sponsor_id,
+                influencer_id=influencer_id,
+                campaign_id=campaign_id,
+                message=message,
+                status='pending'
+            )
+            
+            db.session.add(invitation)
+            db.session.commit()
+            
+            influencer = Influencer.query.get(influencer_id)
+            flash(f'Invitation sent successfully to {influencer.username} for campaign "{campaign.name}"!', 'success')
+            
+        except Exception as e:
+            db.session.rollback()
+            flash('Error sending invitation. Please try again.', 'error')
+            print(f"Invitation error: {e}")
+        
+        return redirect(request.referrer or url_for('sfind'))
+
+    @app.route('/iinvitations')
+    def influencer_invitations():
+        if 'influencer_id' not in session:
+            flash('You need to log in first.', 'error')
+            return redirect(url_for('influ_log'))
+        
+        influencer_id = session['influencer_id']
+        influencer = Influencer.query.get(influencer_id)
+        
+        # Get all invitations for this influencer
+        invitations = CampaignInvitation.query.filter_by(
+            influencer_id=influencer_id
+        ).order_by(CampaignInvitation.created_at.desc()).all()
+        
+        # Count pending invitations for badge
+        pending_count = CampaignInvitation.query.filter_by(
+            influencer_id=influencer_id,
+            status='pending'
+        ).count()
+        
+        return render_template('influ_invitations.html',
+                               influencer=influencer,
+                               invitations=invitations,
+                               pending_count=pending_count)
+    
+    @app.route('/respond_invitation/<int:invitation_id>/<action>', methods=['POST'])
+    def respond_invitation(invitation_id, action):
+        if 'influencer_id' not in session:
+            flash('You need to log in first.', 'error')
+            return redirect(url_for('influ_log'))
+        
+        invitation = CampaignInvitation.query.get_or_404(invitation_id)
+        
+        # Check if invitation belongs to logged-in influencer
+        if invitation.influencer_id != session['influencer_id']:
+            flash('You can only respond to your own invitations.', 'error')
+            return redirect(url_for('influencer_invitations'))
+        
+        # Check if invitation is still pending
+        if invitation.status != 'pending':
+            flash('This invitation has already been responded to.', 'warning')
+            return redirect(url_for('influencer_invitations'))
+        
+        if action not in ['accept', 'decline']:
+            flash('Invalid action.', 'error')
+            return redirect(url_for('influencer_invitations'))
+        
+        try:
+            if action == 'accept':
+                # Check if application already exists
+                existing_application = Application.query.filter_by(
+                    influencer_id=invitation.influencer_id,
+                    campaign_id=invitation.campaign_id
+                ).first()
+                
+                if existing_application:
+                    flash(f'You already have an application for "{invitation.campaign.name}" with status: {existing_application.status}.', 'warning')
+                    invitation.status = 'accepted'
+                    invitation.responded_at = datetime.utcnow()
+                else:
+                    # Create accepted application when invitation is accepted (making it immediately active)
+                    new_application = Application(
+                        influencer_id=invitation.influencer_id,
+                        campaign_id=invitation.campaign_id,
+                        status='accepted'  # Directly accepted since sponsor invited them
+                    )
+                    db.session.add(new_application)
+                    invitation.status = 'accepted'
+                    flash(f'Invitation accepted! You are now actively participating in "{invitation.campaign.name}".', 'success')
+            else:  # decline
+                invitation.status = 'declined'
+                flash(f'Invitation for "{invitation.campaign.name}" has been declined.', 'info')
+            
+            invitation.responded_at = datetime.utcnow()
+            db.session.commit()
+            
+        except Exception as e:
+            db.session.rollback()
+            flash('Error processing your response. Please try again.', 'error')
+            print(f"Response error: {e}")
+        
+        return redirect(url_for('influencer_invitations'))
+
+    @app.route('/api/invitation_count')
+    def api_invitation_count():
+        if 'influencer_id' not in session:
+            return {'count': 0}, 401
+        
+        count = CampaignInvitation.query.filter_by(
+            influencer_id=session['influencer_id'],
+            status='pending'
+        ).count()
+        
+        return {'count': count}
+
+    @app.route('/api/active_campaigns_count')
+    def api_active_campaigns_count():
+        if 'influencer_id' not in session:
+            return {'count': 0}, 401
+        
+        count = Application.query.filter_by(
+            influencer_id=session['influencer_id'],
+            status='accepted'
+        ).count()
+        
+        return {'count': count}
+
+    @app.route('/api/ongoing_campaigns_count')
+    def api_ongoing_campaigns_count():
+        if 'sponsor_id' not in session:
+            return {'count': 0}, 401
+        
+        sponsor = Sponsor.query.get(session['sponsor_id'])
+        ongoing_count = 0
+        for campaign in sponsor.campaigns:
+            accepted_apps = Application.query.filter_by(campaign_id=campaign.id, status='accepted').count()
+            if accepted_apps > 0:
+                ongoing_count += 1
+        
+        return {'count': ongoing_count}
 
     @app.route('/ifind', methods=['GET', 'POST'])
     def ifind():

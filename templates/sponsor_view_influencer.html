@@ -324,10 +324,32 @@
                         </div>
                         
                         <div class="campaign-actions">
-                            <button class="btn btn-primary invite-btn" data-campaign-id="{{ campaign.id }}" data-influencer-id="{{ influencer.id }}">
-                                <i class="fas fa-paper-plane"></i>
-                                Send Invitation
-                            </button>
+                            {% set status = campaign_status[campaign.id] %}
+                            {% if status.application %}
+                                <!-- Influencer has already applied -->
+                                <div class="status-badge applied">
+                                    <i class="fas fa-check-circle"></i>
+                                    Applied ({{ status.application.status.title() }})
+                                </div>
+                            {% elif status.invitation %}
+                                <!-- Invitation already sent -->
+                                <div class="status-badge invited">
+                                    <i class="fas fa-envelope"></i>
+                                    Invitation {{ status.invitation.status.title() }}
+                                </div>
+                            {% elif status.can_invite %}
+                                <!-- Can send invitation -->
+                                <button class="btn btn-primary invite-btn" data-campaign-id="{{ campaign.id }}" data-influencer-id="{{ influencer.id }}">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Send Invitation
+                                </button>
+                            {% else %}
+                                <!-- Fallback status -->
+                                <div class="status-badge unavailable">
+                                    <i class="fas fa-times-circle"></i>
+                                    Not Available
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                     {% endfor %}
@@ -401,9 +423,34 @@
 
         function confirmInvitation() {
             if (selectedCampaignId && selectedInfluencerId) {
-                // Here you would typically send an AJAX request to invite the influencer
-                alert('Invitation sent to {{ influencer.username }} for campaign ' + selectedCampaignId + '!');
-                closeInvitationModal();
+                // Create form and submit to send invitation
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ url_for("send_invitation") }}';
+                
+                // Add influencer_id
+                const influencerInput = document.createElement('input');
+                influencerInput.type = 'hidden';
+                influencerInput.name = 'influencer_id';
+                influencerInput.value = selectedInfluencerId;
+                form.appendChild(influencerInput);
+                
+                // Add campaign_id
+                const campaignInput = document.createElement('input');
+                campaignInput.type = 'hidden';
+                campaignInput.name = 'campaign_id';
+                campaignInput.value = selectedCampaignId;
+                form.appendChild(campaignInput);
+                
+                // Add optional message (you can add a textarea in modal for this)
+                const messageInput = document.createElement('input');
+                messageInput.type = 'hidden';
+                messageInput.name = 'message';
+                messageInput.value = 'We would love to collaborate with you on this campaign!';
+                form.appendChild(messageInput);
+                
+                document.body.appendChild(form);
+                form.submit();
             }
         }
 

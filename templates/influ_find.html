@@ -50,6 +50,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="{{ url_for('influencer_invitations') }}" class="nav-link">
+                        <i class="fas fa-envelope"></i>
+                        <span>Invitations</span>
+                        <span class="notification-badge" id="invitations-badge" style="display: none;">0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="{{ url_for('influencer_history') }}" class="nav-link">
                         <i class="fas fa-history"></i>
                         <span>History</span>
@@ -487,6 +494,32 @@
                 closeModal();
             }
         }, 10000);
+        
+        // Check for invitations on page load
+        updateInvitationsBadge();
+        
+        // Check for invitations every 30 seconds
+        setInterval(updateInvitationsBadge, 30000);
+    </script>
+    
+    <script>
+        // Function to update invitations badge
+        function updateInvitationsBadge() {
+            fetch('/api/invitation_count')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('invitations-badge');
+                    if (badge) {
+                        if (data.count > 0) {
+                            badge.textContent = data.count;
+                            badge.style.display = 'flex';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(error => console.error('Error fetching invitation count:', error));
+        }
     </script>
 </body>
 </html>

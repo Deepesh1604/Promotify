@@ -184,6 +184,10 @@
                                     <i class="fas fa-eye"></i>
                                     View Profile
                                 </a>
+                                <button class="btn btn-secondary invite-btn" data-influencer-id="{{ influencer.id }}" data-influencer-name="{{ influencer.username }}">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Invite
+                                </button>
                             </div>
                         </div>
                         {% endfor %}
@@ -265,7 +269,226 @@
             }
         });
 
+        // Invitation functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const inviteButtons = document.querySelectorAll('.invite-btn');
+            inviteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const influencerId = this.getAttribute('data-influencer-id');
+                    const influencerName = this.getAttribute('data-influencer-name');
+                    showInviteModal(influencerId, influencerName);
+                });
+            });
+        });
+
+        let selectedInfluencerId = null;
+        let selectedInfluencerName = null;
+
+        function showInviteModal(influencerId, influencerName) {
+            selectedInfluencerId = influencerId;
+            selectedInfluencerName = influencerName;
+            
+            document.getElementById('inviteInfluencerName').textContent = influencerName;
+            document.getElementById('inviteModal').style.display = 'block';
+        }
+
+        function closeInviteModal() {
+            document.getElementById('inviteModal').style.display = 'none';
+            selectedInfluencerId = null;
+            selectedInfluencerName = null;
+        }
+
+        function sendInvitation() {
+            const campaignId = document.getElementById('campaignSelect').value;
+            const message = document.getElementById('inviteMessage').value;
+            
+            if (!campaignId) {
+                alert('Please select a campaign.');
+                return;
+            }
+            
+            if (selectedInfluencerId) {
+                // Create form and submit
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ url_for("send_invitation") }}';
+                
+                // Add form fields
+                const fields = {
+                    'influencer_id': selectedInfluencerId,
+                    'campaign_id': campaignId,
+                    'message': message
+                };
+                
+                Object.keys(fields).forEach(key => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = fields[key];
+                    form.appendChild(input);
+                });
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('inviteModal');
+            if (event.target === modal) {
+                closeInviteModal();
+            }
+        }
 
     </script>
+    
+    <!-- Invitation Modal -->
+    <div id="inviteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-paper-plane"></i> Send Campaign Invitation</h3>
+                <button class="modal-close" onclick="closeInviteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Send a campaign invitation to <strong id="inviteInfluencerName"></strong></p>
+                
+                <div class="form-group">
+                    <label for="campaignSelect">Select Campaign:</label>
+                    <select id="campaignSelect" class="form-control" required>
+                        <option value="">Choose a campaign...</option>
+                        {% if sponsor_campaigns %}
+                            {% for campaign in sponsor_campaigns %}
+                            <option value="{{ campaign.id }}">
+                                {{ campaign.name }} - ${{ "{:,}".format(campaign.budget) }}
+                            </option>
+                            {% endfor %}
+                        {% endif %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="inviteMessage">Personal Message (Optional):</label>
+                    <textarea id="inviteMessage" class="form-control" rows="3" 
+                              placeholder="Add a personal message to make your invitation more appealing..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeInviteModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="sendInvitation()">
+                    <i class="fas fa-paper-plane"></i> Send Invitation
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--surface-dark);
+            margin: 5% auto;
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow-heavy);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--surface-card);
+        }
+
+        .modal-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            background: var(--surface-card);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--surface-light);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-family: inherit;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--sponsor-color);
+            background: var(--surface-card);
+        }
+
+        .form-control option {
+            background: var(--surface-dark);
+            color: var(--text-primary);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+    </style>
 </body>
 </html>
