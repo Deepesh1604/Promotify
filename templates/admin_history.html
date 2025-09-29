@@ -97,6 +97,7 @@
                             <form method="GET" class="search-form">
                                 <input type="hidden" name="filter" value="{{ filter_type }}">
                                 <input type="hidden" name="user_filter" value="{{ user_filter }}">
+                                <input type="hidden" name="category_filter" value="{{ category_filter }}">
                                 <div class="search-input">
                                     <i class="fas fa-search"></i>
                                     <input type="text" name="search" placeholder="Search campaigns, users, transactions..." value="{{ search_query }}">
@@ -111,16 +112,16 @@
                         <div class="filter-group">
                             <label class="filter-label">Time Period</label>
                             <div class="filter-buttons">
-                                <a href="{{ url_for('admin_history') }}?filter=today{% if search_query %}&search={{ search_query }}{% endif %}{% if user_filter != 'all' %}&user_filter={{ user_filter }}{% endif %}" class="filter-btn {% if filter_type == 'today' %}active{% endif %}">
+                                <a href="{{ url_for('admin_history') }}?filter=today{% if search_query %}&search={{ search_query }}{% endif %}{% if user_filter != 'all' %}&user_filter={{ user_filter }}{% endif %}{% if category_filter != 'all' %}&category_filter={{ category_filter }}{% endif %}" class="filter-btn {% if filter_type == 'today' and not request.args.get('start_date') and not request.args.get('end_date') %}active{% endif %}">
                                     <i class="fas fa-calendar-day"></i> Today
                                 </a>
-                                <a href="{{ url_for('admin_history') }}?filter=week{% if search_query %}&search={{ search_query }}{% endif %}{% if user_filter != 'all' %}&user_filter={{ user_filter }}{% endif %}" class="filter-btn {% if filter_type == 'week' %}active{% endif %}">
+                                <a href="{{ url_for('admin_history') }}?filter=week{% if search_query %}&search={{ search_query }}{% endif %}{% if user_filter != 'all' %}&user_filter={{ user_filter }}{% endif %}{% if category_filter != 'all' %}&category_filter={{ category_filter }}{% endif %}" class="filter-btn {% if filter_type == 'week' and not request.args.get('start_date') and not request.args.get('end_date') %}active{% endif %}">
                                     <i class="fas fa-calendar-week"></i> Last Week
                                 </a>
-                                <a href="{{ url_for('admin_history') }}?filter=month{% if search_query %}&search={{ search_query }}{% endif %}{% if user_filter != 'all' %}&user_filter={{ user_filter }}{% endif %}" class="filter-btn {% if filter_type == 'month' %}active{% endif %}">
+                                <a href="{{ url_for('admin_history') }}?filter=month{% if search_query %}&search={{ search_query }}{% endif %}{% if user_filter != 'all' %}&user_filter={{ user_filter }}{% endif %}{% if category_filter != 'all' %}&category_filter={{ category_filter }}{% endif %}" class="filter-btn {% if filter_type == 'month' and not request.args.get('start_date') and not request.args.get('end_date') %}active{% endif %}">
                                     <i class="fas fa-calendar-alt"></i> Last Month
                                 </a>
-                                <a href="{{ url_for('admin_history') }}?filter=overall{% if search_query %}&search={{ search_query }}{% endif %}{% if user_filter != 'all' %}&user_filter={{ user_filter }}{% endif %}" class="filter-btn {% if filter_type == 'overall' %}active{% endif %}">
+                                <a href="{{ url_for('admin_history') }}?filter=overall{% if search_query %}&search={{ search_query }}{% endif %}{% if user_filter != 'all' %}&user_filter={{ user_filter }}{% endif %}{% if category_filter != 'all' %}&category_filter={{ category_filter }}{% endif %}" class="filter-btn {% if filter_type == 'overall' and not request.args.get('start_date') and not request.args.get('end_date') %}active{% endif %}">
                                     <i class="fas fa-history"></i> Overall
                                 </a>
                             </div>
@@ -130,37 +131,82 @@
                         <div class="filter-group">
                             <label class="filter-label">User Type</label>
                             <div class="filter-buttons secondary">
-                                <a href="{{ url_for('admin_history') }}?filter={{ filter_type }}&user_filter=all{% if search_query %}&search={{ search_query }}{% endif %}" class="filter-btn secondary {% if user_filter == 'all' %}active{% endif %}">
+                                <a href="{{ url_for('admin_history') }}?filter={{ filter_type }}&user_filter=all{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter != 'all' %}&category_filter={{ category_filter }}{% endif %}" class="filter-btn secondary {% if user_filter == 'all' %}active{% endif %}">
                                     <i class="fas fa-users"></i> All Users
                                 </a>
-                                <a href="{{ url_for('admin_history') }}?filter={{ filter_type }}&user_filter=sponsors{% if search_query %}&search={{ search_query }}{% endif %}" class="filter-btn secondary {% if user_filter == 'sponsors' %}active{% endif %}">
+                                <a href="{{ url_for('admin_history') }}?filter={{ filter_type }}&user_filter=sponsors{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter != 'all' %}&category_filter={{ category_filter }}{% endif %}" class="filter-btn secondary {% if user_filter == 'sponsors' %}active{% endif %}">
                                     <i class="fas fa-briefcase"></i> Sponsors
                                 </a>
-                                <a href="{{ url_for('admin_history') }}?filter={{ filter_type }}&user_filter=influencers{% if search_query %}&search={{ search_query }}{% endif %}" class="filter-btn secondary {% if user_filter == 'influencers' %}active{% endif %}">
+                                <a href="{{ url_for('admin_history') }}?filter={{ filter_type }}&user_filter=influencers{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter != 'all' %}&category_filter={{ category_filter }}{% endif %}" class="filter-btn secondary {% if user_filter == 'influencers' %}active{% endif %}">
                                     <i class="fas fa-star"></i> Influencers
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Category Filter -->
+                        <div class="filter-group">
+                            <label class="filter-label">Data Category</label>
+                            <div class="filter-buttons tertiary">
+                                <a href="{{ url_for('admin_history') }}?filter={{ filter_type }}&user_filter={{ user_filter }}&category_filter=all{% if search_query %}&search={{ search_query }}{% endif %}" class="filter-btn tertiary {% if category_filter == 'all' %}active{% endif %}">
+                                    <i class="fas fa-th"></i> All Data
+                                </a>
+                                <a href="{{ url_for('admin_history') }}?filter={{ filter_type }}&user_filter={{ user_filter }}&category_filter=applications{% if search_query %}&search={{ search_query }}{% endif %}" class="filter-btn tertiary {% if category_filter == 'applications' %}active{% endif %}">
+                                    <i class="fas fa-paper-plane"></i> Applications History
+                                </a>
+                                <a href="{{ url_for('admin_history') }}?filter={{ filter_type }}&user_filter={{ user_filter }}&category_filter=campaigns{% if search_query %}&search={{ search_query }}{% endif %}" class="filter-btn tertiary {% if category_filter == 'campaigns' %}active{% endif %}">
+                                    <i class="fas fa-bullhorn"></i> Campaigns History
+                                </a>
+                                <a href="{{ url_for('admin_history') }}?filter={{ filter_type }}&user_filter={{ user_filter }}&category_filter=transactions{% if search_query %}&search={{ search_query }}{% endif %}" class="filter-btn tertiary {% if category_filter == 'transactions' %}active{% endif %}">
+                                    <i class="fas fa-exchange-alt"></i> Transactions History
+                                </a>
+                                <a href="{{ url_for('admin_history') }}?filter={{ filter_type }}&user_filter={{ user_filter }}&category_filter=users{% if search_query %}&search={{ search_query }}{% endif %}" class="filter-btn tertiary {% if category_filter == 'users' %}active{% endif %}">
+                                    <i class="fas fa-user-plus"></i> User Registrations
                                 </a>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Right side download options -->
-                    <div class="download-group">
-                        <label class="filter-label">Export Data</label>
-                        <div class="download-buttons">
-                            <a href="{{ url_for('download_admin_history') }}?filter={{ filter_type }}&user_filter={{ user_filter }}{% if search_query %}&search={{ search_query }}{% endif %}&type=all" class="btn btn-success">
-                                <i class="fas fa-download"></i> All Data
-                            </a>
-                            <div class="dropdown">
-                                <button class="btn btn-info dropdown-toggle">
-                                    <i class="fas fa-file-export"></i> Specific Data
-                                </button>
-                                <div class="dropdown-content">
-                                    <a href="{{ url_for('download_admin_history') }}?filter={{ filter_type }}&user_filter={{ user_filter }}{% if search_query %}&search={{ search_query }}{% endif %}&type=applications">Applications</a>
-                                    <a href="{{ url_for('download_admin_history') }}?filter={{ filter_type }}&user_filter={{ user_filter }}{% if search_query %}&search={{ search_query }}{% endif %}&type=campaigns">Campaigns</a>
-                                    <a href="{{ url_for('download_admin_history') }}?filter={{ filter_type }}&user_filter={{ user_filter }}{% if search_query %}&search={{ search_query }}{% endif %}&type=transactions">Transactions</a>
-                                    <a href="{{ url_for('download_admin_history') }}?filter={{ filter_type }}&user_filter={{ user_filter }}{% if search_query %}&search={{ search_query }}{% endif %}&type=payments">Payments</a>
-                                    <a href="{{ url_for('download_admin_history') }}?filter={{ filter_type }}&user_filter={{ user_filter }}{% if search_query %}&search={{ search_query }}{% endif %}&type=users">User Registrations</a>
+                    <!-- Right side filters and options -->
+                    <div class="filter-right">
+                        <!-- Date Range Filter -->
+                        <div class="date-filter-group">
+                            <label class="filter-label">Date Range</label>
+                            <form method="GET" class="date-filter-form">
+                                <input type="hidden" name="filter" value="{{ filter_type }}">
+                                <input type="hidden" name="user_filter" value="{{ user_filter }}">
+                                <input type="hidden" name="category_filter" value="{{ category_filter }}">
+                                {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
+                                <div class="date-inputs">
+                                    <div class="date-input-group">
+                                        <label for="start_date">From:</label>
+                                        <input type="date" id="start_date" name="start_date" value="{{ request.args.get('start_date', '') }}" class="date-input">
+                                    </div>
+                                    <div class="date-input-group">
+                                        <label for="end_date">To:</label>
+                                        <input type="date" id="end_date" name="end_date" value="{{ request.args.get('end_date', '') }}" class="date-input">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-calendar-check"></i> Apply
+                                    </button>
+                                    {% if request.args.get('start_date') or request.args.get('end_date') %}
+                                    <a href="{{ url_for('admin_history') }}?filter={{ filter_type }}&user_filter={{ user_filter }}&category_filter={{ category_filter }}{% if search_query %}&search={{ search_query }}{% endif %}" class="btn btn-secondary btn-sm">
+                                        <i class="fas fa-times"></i> Clear
+                                    </a>
+                                    {% endif %}
                                 </div>
+                            </form>
+                        </div>
+
+                        <!-- Export Data -->
+                        <div class="download-group">
+                            <label class="filter-label">Export Data</label>
+                            <div class="download-buttons">
+                                <a href="{{ url_for('download_admin_history') }}?filter=overall&user_filter=all&category_filter=all&type=all" class="btn btn-info">
+                                    <i class="fas fa-database"></i> Download All Data
+                                </a>
+                                <a href="{{ url_for('download_admin_history') }}?filter={{ filter_type }}&user_filter={{ user_filter }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter != 'all' %}&category_filter={{ category_filter }}{% endif %}{% if request.args.get('start_date') %}&start_date={{ request.args.get('start_date') }}{% endif %}{% if request.args.get('end_date') %}&end_date={{ request.args.get('end_date') }}{% endif %}&type=all" class="btn btn-success">
+                                    <i class="fas fa-download"></i> Download Filtered Data
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -421,7 +467,7 @@
                     <i class="fas fa-search"></i>
                     <h3>No Data Found</h3>
                     <p>No activity matches your current filters. Try adjusting your search criteria or time period.</p>
-                    <a href="{{ url_for('admin_history') }}" class="btn btn-primary">
+                    <a href="{{ url_for('admin_history') }}?filter=overall&user_filter=all&category_filter=all" class="btn btn-primary">
                         <i class="fas fa-refresh"></i> Reset Filters
                     </a>
                 </div>

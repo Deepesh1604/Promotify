@@ -4,170 +4,158 @@
 
 ![Promotify Logo](static/images/promotify.png)
 
-**Connecting Brands with Influencers Through Seamless Digital Marketing**
+**Professional Influencer Marketing Platform with Integrated Payment System**
 
-[![Built with Flask](https://img.shields.io/badge/Built%20with-Flask-blue.svg)](https://flask.palletsprojects.com/)
-[![Database](https://img.shields.io/badge/Database-SQLite-lightgrey.svg)](https://www.sqlite.org/)
-[![UI Framework](https://img.shields.io/badge/UI-Modern%20CSS-orange.svg)](https://github.com/Deepesh1604/Promotify)
+[![Flask](https://img.shields.io/badge/Flask-2.3+-blue.svg)](https://flask.palletsprojects.com/)
+[![Python](https://img.shields.io/badge/Python-3.8+-green.svg)](https://www.python.org/)
+[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-ORM-orange.svg)](https://sqlalchemy.org/)
+[![License](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
 </div>
 
-## 📋 Table of Contents
-
-- [🎯 Overview](#-overview)
-- [✨ Key Features](#-key-features)
-- [💰 Wallet System](#-wallet-system)
-- [🛠️ Technology Stack](#️-technology-stack)
-- [🚀 Quick Start](#-quick-start)
-- [🌍 Real-World Applications](#-real-world-applications)
-
----
-
 ## 🎯 Overview
 
-**Promotify** is a modern influencer marketing platform that connects brands with content creators. It features a comprehensive wallet system, campaign management tools, and an intuitive interface designed for seamless collaboration.
+**Promotify** is a comprehensive influencer marketing platform that facilitates seamless collaboration between brands and content creators. Built with Flask and modern web technologies, it features an integrated digital wallet system, campaign management tools, and advanced analytics.
 
-**Key Highlights:**
-- **Three User Types**: Sponsors, Influencers, and Administrators
-- **Integrated Wallet**: Automatic payment processing with UPI/Card support
-- **Campaign Management**: Complete lifecycle from creation to completion
-- **Modern UI**: Glass morphism design with responsive layouts
+### Key Differentiators
+- **🔄 End-to-End Workflow**: Complete campaign lifecycle from creation to payment
+- **💳 Integrated Payments**: Automatic wallet processing with real-time transactions
+- **📊 Advanced Analytics**: Multi-role dashboards with filtering and export capabilities  
+- **🎨 Modern Interface**: Professional UI with responsive design and dark theme
 
----
+## ✨ Core Features
 
-## ✨ Key Features
+### 🏢 Sponsor Dashboard
+- **Campaign Creation**: Define budgets, timelines, and target demographics
+- **Influencer Discovery**: Search and filter by niche, followers, and engagement
+- **Automated Payments**: Instant wallet transfers upon campaign acceptance
+- **Application Management**: Streamlined approval workflows with bulk actions
+- **Performance Analytics**: Campaign ROI tracking and detailed reporting
 
-### 🏢 **For Sponsors**
-- Create and manage campaigns with budget, timeline, and requirements
-- Integrated wallet system with UPI/Card payments
-- Automatic payment processing upon campaign acceptance
-- Real-time application tracking and approval workflows
-- Search and discover relevant influencers
+### 🌟 Influencer Portal
+- **Campaign Discovery**: Browse and apply for relevant opportunities
+- **Social Integration**: Link Instagram, YouTube, LinkedIn, and Twitter profiles
+- **Instant Earnings**: Real-time wallet updates with secure withdrawals
+- **Portfolio Management**: Showcase content and track collaboration history
+- **Analytics Dashboard**: Earnings insights and performance metrics
 
-### 🌟 **For Influencers**  
-- Discover and apply for relevant campaigns
-- Digital wallet with instant payment reception
-- Bank account integration for secure withdrawals
-- Social media profile integration (Instagram, YouTube, LinkedIn, Twitter)
-- Comprehensive earnings and transaction history
+### �‍💼 Admin Control Center  
+- **Platform Oversight**: User management and content moderation
+- **Financial Monitoring**: Transaction tracking and dispute resolution
+- **Advanced Filtering**: Filter by applications, campaigns, transactions, users
+- **Data Export**: Download filtered data or complete platform analytics
+- **System Analytics**: Platform growth metrics and user engagement insights
 
-### 👥 **For Administrators**
-- Complete platform oversight and user management
-- Campaign monitoring and content moderation
-- Analytics dashboard with platform-wide insights
-- Payment system oversight and dispute resolution
+## 💰 Digital Wallet System
 
-## 💰 Wallet System
+**Secure, automated payment processing with multi-method support:**
 
-**Promotify** features an integrated digital wallet system for seamless financial transactions:
-
-### 🏦 **Payment Processing**
-- **Multiple Payment Methods**: UPI, Credit/Debit Cards, Net Banking
-- **Automatic Transfers**: Instant payment to influencers upon campaign acceptance
-- **Secure Withdrawals**: Bank account integration for influencers
-- **Transaction History**: Complete audit trail with reference IDs
-- **Real-time Updates**: Instant balance updates and notifications
-
-### 💳 **Security Features**
-- End-to-end transaction encryption
-- Automated fraud detection and monitoring
-- Complete audit trails for compliance
-- Secure bank account integration
+- **Payment Methods**: UPI, Credit/Debit Cards, Net Banking
+- **Instant Transfers**: Automatic balance updates on campaign acceptance  
+- **Withdrawal System**: Direct bank account integration for influencers
+- **Transaction Logging**: Complete audit trails with reference tracking
+- **Balance Management**: Real-time balance updates with notification system
 
 ```python
-# Automatic Payment Processing
-def accept_application(application_id):
-    sponsor.wallet_balance -= campaign_budget
-    influencer.wallet_balance += campaign_budget
-    create_transaction_records(sponsor, influencer, campaign_budget)
+# Automated Payment Flow
+@app.route('/accept_application/<int:app_id>')
+def accept_application(app_id):
+    # Validate sponsor balance
+    if sponsor.wallet_balance >= campaign.budget:
+        # Process payment
+        sponsor.wallet_balance -= campaign.budget
+        influencer.wallet_balance += campaign.budget
+        # Create transaction records
+        create_wallet_transaction(sponsor, influencer, campaign.budget)
+        return jsonify({'success': True, 'message': 'Payment processed'})
 ```
 
 ## 🛠️ Technology Stack
 
-**Backend:**
-- **Flask** - Python web framework
-- **SQLAlchemy** - Database ORM
-- **SQLite** - Database (Production: PostgreSQL ready)
+**Backend Architecture:**
+- **Flask 2.3+** - Lightweight WSGI web framework
+- **SQLAlchemy** - Object-relational mapping and database abstraction
+- **SQLite/PostgreSQL** - Development and production database support
+- **Jinja2** - Server-side template rendering
 
-**Frontend:**
-- **Jinja2** - Template engine
-- **Modern CSS** - Glass morphism design
-- **Font Awesome** - Icons
-- **Responsive Design** - Mobile-first approach
+**Frontend Technologies:**
+- **Modern CSS3** - Custom styling with CSS Grid and Flexbox
+- **JavaScript ES6** - Interactive UI components and AJAX functionality  
+- **Font Awesome** - Professional icon library
+- **Responsive Design** - Mobile-first approach with breakpoints
 
-**Features:**
-- Session-based authentication
-- Real-time payment processing
-- Comprehensive input validation
-- Professional UI/UX design
+**Security & Performance:**
+- Session-based authentication with secure cookie handling
+- Input validation and SQL injection prevention
+- Optimized database queries with proper indexing
+- Professional error handling and logging
 
-## 🚀 Quick Start
+## 🚀 Quick Start Guide
 
-### Installation
+### 1. Installation
 ```bash
+# Clone repository
 git clone https://github.com/Deepesh1604/Promotify.git
 cd Promotify
-python -m venv venv
+
+# Setup virtual environment
+python3 -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### Setup Database
+### 2. Database Setup
 ```bash
-python rebuild_database.py    # Create fresh database
-python wallet_test_data.py    # Add sample data
+python3 main.py  # Creates database on first run
 ```
 
-### Run Application
+### 3. Launch Application
 ```bash
 python3 main.py
-```
-Open browser: `http://localhost:5006`
-
-### Test Credentials
-```
-Sponsor: sponsor@test.com / password123 (₹1,00,000 balance)
-Influencer: tech@influencer.com / password123 (₹15,000 balance)
-Admin: admin@promotify.com / admin123
+# Open browser: http://localhost:5007
 ```
 
-## 🌍 Real-World Applications
+### 4. Demo Credentials
+```
+🏢 Sponsor: sponsor@demo.com / password123
+🌟 Influencer: influencer@demo.com / password123  
+👨‍💼 Admin: admin@promotify.com / admin123
+```
 
-**E-commerce & Retail**
-- Product launches with lifestyle influencers
-- Seasonal promotions and unboxing content
-- User-generated testimonials
+## 📁 Project Architecture
 
-**Technology & Software** 
-- App promotion through gaming influencers
-- Tech reviews and tutorial content
-- B2B software marketing
+```
+Promotify/
+├── main.py              # Application entry point and Flask configuration
+├── routes.py            # Route handlers and business logic (2000+ lines)
+├── models.py            # SQLAlchemy database models and relationships
+├── static/
+│   ├── css/            # Component-specific stylesheets
+│   └── images/         # Platform assets and branding
+├── templates/          # Jinja2 HTML templates for all user roles
+├── instance/           # Database files and sensitive configuration
+└── requirements.txt    # Production dependencies
+```
 
-**Travel & Food**
-- Destination marketing with travel bloggers
-- Restaurant promotions and recipe content
-- Cultural and culinary experiences
+## 🎪 Live Features Demo
 
-**Success Examples:**
-- **Local Bakery**: ₹15,000 campaign → 300% Instagram engagement, 150% sales boost
-- **Tech Startup**: ₹2,00,000 campaign → 50K app downloads, 25% paid conversions
-- **Fashion Influencer**: ₹45,000 monthly earnings from 20 campaign applications
-
-
+- **Multi-Role Authentication**: Separate interfaces for sponsors, influencers, and admins
+- **Real-Time Payments**: Instant wallet processing with balance validation
+- **Campaign Invitations**: Direct sponsor-to-influencer campaign invitations
+- **Advanced Filtering**: Filter platform data by time, users, categories, and date ranges
+- **Data Export**: Download complete or filtered platform analytics
+- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
 
 ---
 
-## 👨‍💻 Author
-
-**Developed by: [Deepesh Kumar Dawar](https://github.com/Deepesh1604)**
-
-*Full-stack developer passionate about creating innovative digital marketing solutions that connect brands with creators through technology.*
-
 <div align="center">
 
-**🌟 Promotify - Where Brands Meet Creators 🌟**
+**Built by [Deepesh Kumar Dawar](https://github.com/Deepesh1604)** 
 
-[![GitHub Stars](https://img.shields.io/github/stars/Deepesh1604/Promotify?style=social)](https://github.com/Deepesh1604/Promotify)
-[![Follow on GitHub](https://img.shields.io/github/followers/Deepesh1604?style=social)](https://github.com/Deepesh1604)
+*Connecting brands with creators through innovative technology*
+
+[![⭐ Star this repo](https://img.shields.io/github/stars/Deepesh1604/Promotify?style=social)](https://github.com/Deepesh1604/Promotify)
 
 </div>

@@ -355,20 +355,23 @@ body {
 }
 
 .filter-controls {
-    display: grid;
+    display: flex;
     gap: 20px;
-    grid-template-columns: 1fr auto;
-    align-items: start;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
 }
 
 .filter-left {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    flex: 1;
+    min-width: 600px;
 }
 
 .search-group {
-    grid-column: 1 / -1;
+    width: 100%;
 }
 
 .search-form {
@@ -465,6 +468,91 @@ body {
     background: var(--gradient-primary);
 }
 
+.filter-btn.tertiary {
+    background: var(--surface-card);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    font-size: 0.75rem;
+    padding: 5px 8px;
+}
+
+.filter-btn.tertiary:hover {
+    border-color: rgba(99, 102, 241, 0.5);
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary-color);
+}
+
+.filter-btn.tertiary.active {
+    background: var(--gradient-primary);
+    color: white;
+    border-color: transparent;
+}
+
+.filter-right {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-end;
+    min-width: 300px;
+}
+
+.date-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+    position: relative;
+}
+
+.date-filter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.date-inputs {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.date-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: flex-end;
+}
+
+.date-input-group label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.date-input {
+    padding: 6px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--surface-light);
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    min-width: 130px;
+    transition: var(--transition);
+}
+
+.date-input:focus {
+    outline: none;
+    border-color: var(--admin-color);
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
 .download-group {
     display: flex;
     flex-direction: column;
@@ -476,9 +564,10 @@ body {
 
 .download-buttons {
     display: flex;
-    gap: 10px;
-    align-items: center;
-    justify-content: flex-end;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+    min-width: 200px;
 }
 
 .btn {

@@ -263,11 +263,20 @@
                                 <a href="{{ url_for('sview_influencer_profile', influencer_id=application.influencer.id, campaign=application.campaign.name) }}" class="btn btn-primary" title="View {{ application.influencer.username }}'s complete profile">
                                     <i class="fas fa-user"></i> View Profile
                                 </a>
-                                <form action="{{ url_for('accept_application', application_id=application.id) }}" method="POST" style="display: inline;">
+                                {% if sponsor.wallet_balance >= application.campaign.budget %}
+                                <form action="{{ url_for('accept_application', application_id=application.id) }}" method="POST" style="display: inline;" onsubmit="return confirmAcceptance('{{ application.influencer.username }}', '{{ application.campaign.name }}', '{{ application.campaign.budget }}')">
                                     <button type="submit" class="btn btn-success">
-                                        <i class="fas fa-check"></i> Accept
+                                        <i class="fas fa-check"></i> Accept (₹{{ "{:,}".format(application.campaign.budget) }})
                                     </button>
                                 </form>
+                                {% else %}
+                                <button type="button" class="btn btn-secondary" disabled title="Insufficient wallet balance. Need ₹{{ '{:,}'.format(application.campaign.budget - sponsor.wallet_balance) }} more">
+                                    <i class="fas fa-wallet"></i> Insufficient Balance
+                                </button>
+                                <a href="{{ url_for('sponsor_wallet') }}" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-plus"></i> Add Funds
+                                </a>
+                                {% endif %}
                                 <form action="{{ url_for('reject_application', application_id=application.id) }}" method="POST" style="display: inline;">
                                     <button type="submit" class="btn btn-danger">
                                         <i class="fas fa-times"></i> Reject
@@ -357,6 +366,18 @@
             if (event.target == modal) {
                 closeDeleteModal();
             }
+        }
+
+        // Confirmation for application acceptance
+        function confirmAcceptance(influencerName, campaignName, budget) {
+            const message = `Accept application from ${influencerName} for "${campaignName}"?\n\n` +
+                          `This will:\n` +
+                          `• Pay ₹${budget} to ${influencerName}\n` +
+                          `• Deduct ₹${budget} from your wallet\n` +
+                          `• Make the campaign active\n\n` +
+                          `Are you sure you want to proceed?`;
+            
+            return confirm(message);
         }
     </script>
 

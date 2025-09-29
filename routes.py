@@ -559,12 +559,29 @@ def register_routes(app):
         filter_type = request.args.get('filter', 'overall')
         search_query = request.args.get('search', '')
         user_filter = request.args.get('user_filter', 'all')  # all, sponsors, influencers
+        category_filter = request.args.get('category_filter', 'all')  # all, applications, campaigns, transactions, users
+        start_date_str = request.args.get('start_date', '')
+        end_date_str = request.args.get('end_date', '')
         
         # Calculate date ranges
         now = datetime.now()
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         week_start = now - timedelta(days=7)
         month_start = now - timedelta(days=30)
+        
+        # Parse custom date range if provided
+        custom_start_date = None
+        custom_end_date = None
+        if start_date_str:
+            try:
+                custom_start_date = datetime.strptime(start_date_str, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+            except ValueError:
+                pass
+        if end_date_str:
+            try:
+                custom_end_date = datetime.strptime(end_date_str, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=999999)
+            except ValueError:
+                pass
         
         # Base queries for all platform data
         applications_query = Application.query
@@ -575,14 +592,46 @@ def register_routes(app):
         influencers_query = Influencer.query
         
         # Apply date filters
-        if filter_type == 'today':
+        # First check if custom date range is provided
+        if custom_start_date or custom_end_date:
+            applications = applications_query
+            campaigns = campaigns_query
+            transactions = transactions_query
+            payments = payments_query
+            sponsors = sponsors_query
+            influencers = influencers_query
+            
+            if custom_start_date:
+                applications = applications.filter(Application.created_at >= custom_start_date)
+                campaigns = campaigns.filter(Campaign.created_at >= custom_start_date)
+                transactions = transactions.filter(WalletTransaction.created_at >= custom_start_date)
+                payments = payments.filter(Payment.payment_date >= custom_start_date)
+                sponsors = sponsors.filter(Sponsor.date_joined >= custom_start_date.date())
+                influencers = influencers.filter(Influencer.date_joined >= custom_start_date.date())
+            
+            if custom_end_date:
+                applications = applications.filter(Application.created_at <= custom_end_date)
+                campaigns = campaigns.filter(Campaign.created_at <= custom_end_date)
+                transactions = transactions.filter(WalletTransaction.created_at <= custom_end_date)
+                payments = payments.filter(Payment.payment_date <= custom_end_date)
+                sponsors = sponsors.filter(Sponsor.date_joined <= custom_end_date.date())
+                influencers = influencers.filter(Influencer.date_joined <= custom_end_date.date())
+            
+            # Set title based on date range
+            if custom_start_date and custom_end_date:
+                base_title = f"Platform Activity ({custom_start_date.strftime('%d %b %Y')} - {custom_end_date.strftime('%d %b %Y')})"
+            elif custom_start_date:
+                base_title = f"Platform Activity (From {custom_start_date.strftime('%d %b %Y')})"
+            elif custom_end_date:
+                base_title = f"Platform Activity (Until {custom_end_date.strftime('%d %b %Y')})"
+        elif filter_type == 'today':
             applications = applications_query.filter(Application.created_at >= today_start)
             campaigns = campaigns_query.filter(Campaign.created_at >= today_start)
             transactions = transactions_query.filter(WalletTransaction.created_at >= today_start)
             payments = payments_query.filter(Payment.payment_date >= today_start)
             sponsors = sponsors_query.filter(Sponsor.date_joined >= today_start.date())
             influencers = influencers_query.filter(Influencer.date_joined >= today_start.date())
-            title = "Today's Platform Activity"
+            base_title = "Today's Platform Activity"
         elif filter_type == 'week':
             applications = applications_query.filter(Application.created_at >= week_start)
             campaigns = campaigns_query.filter(Campaign.created_at >= week_start)
@@ -590,7 +639,7 @@ def register_routes(app):
             payments = payments_query.filter(Payment.payment_date >= week_start)
             sponsors = sponsors_query.filter(Sponsor.date_joined >= week_start.date())
             influencers = influencers_query.filter(Influencer.date_joined >= week_start.date())
-            title = "Last Week's Platform Activity"
+            base_title = "Last Week's Platform Activity"
         elif filter_type == 'month':
             applications = applications_query.filter(Application.created_at >= month_start)
             campaigns = campaigns_query.filter(Campaign.created_at >= month_start)
@@ -598,7 +647,7 @@ def register_routes(app):
             payments = payments_query.filter(Payment.payment_date >= month_start)
             sponsors = sponsors_query.filter(Sponsor.date_joined >= month_start.date())
             influencers = influencers_query.filter(Influencer.date_joined >= month_start.date())
-            title = "Last Month's Platform Activity"
+            base_title = "Last Month's Platform Activity"
         else:  # overall
             applications = applications_query
             campaigns = campaigns_query
@@ -606,7 +655,19 @@ def register_routes(app):
             payments = payments_query
             sponsors = sponsors_query
             influencers = influencers_query
-            title = "Complete Platform History"
+            base_title = "Complete Platform History"
+        
+        # Adjust title based on category filter
+        if category_filter == 'applications':
+            title = f"{base_title} - Applications History"
+        elif category_filter == 'campaigns':
+            title = f"{base_title} - Campaigns History"
+        elif category_filter == 'transactions':
+            title = f"{base_title} - Transactions History"
+        elif category_filter == 'users':
+            title = f"{base_title} - User Registrations"
+        else:
+            title = base_title
         
         # Apply search filters
         if search_query:
@@ -657,13 +718,28 @@ def register_routes(app):
             campaigns = campaigns.filter(False)
             transactions = transactions.filter(WalletTransaction.user_type == 'influencer')
         
-        # Execute queries and order results
-        applications = applications.order_by(Application.created_at.desc()).all()
-        campaigns = campaigns.order_by(Campaign.created_at.desc()).all()
-        transactions = transactions.order_by(WalletTransaction.created_at.desc()).all()
-        payments = payments.order_by(Payment.payment_date.desc()).all()
-        sponsors = sponsors.order_by(Sponsor.date_joined.desc()).all()
-        influencers = influencers.order_by(Influencer.date_joined.desc()).all()
+        # Apply category filter - only fetch data for selected category
+        if category_filter == 'applications':
+            campaigns, transactions, payments, sponsors, influencers = [], [], [], [], []
+            applications = applications.order_by(Application.created_at.desc()).all()
+        elif category_filter == 'campaigns':
+            applications, transactions, payments, sponsors, influencers = [], [], [], [], []
+            campaigns = campaigns.order_by(Campaign.created_at.desc()).all()
+        elif category_filter == 'transactions':
+            applications, campaigns, payments, sponsors, influencers = [], [], [], [], []
+            transactions = transactions.order_by(WalletTransaction.created_at.desc()).all()
+        elif category_filter == 'users':
+            applications, campaigns, transactions, payments = [], [], [], []
+            sponsors = sponsors.order_by(Sponsor.date_joined.desc()).all()
+            influencers = influencers.order_by(Influencer.date_joined.desc()).all()
+        else:  # category_filter == 'all'
+            # Execute queries and order results
+            applications = applications.order_by(Application.created_at.desc()).all()
+            campaigns = campaigns.order_by(Campaign.created_at.desc()).all()
+            transactions = transactions.order_by(WalletTransaction.created_at.desc()).all()
+            payments = payments.order_by(Payment.payment_date.desc()).all()
+            sponsors = sponsors.order_by(Sponsor.date_joined.desc()).all()
+            influencers = influencers.order_by(Influencer.date_joined.desc()).all()
         
         # Calculate comprehensive summary statistics
         total_revenue = sum(t.amount for t in transactions if t.transaction_type == 'debit')
@@ -716,6 +792,7 @@ def register_routes(app):
                                filter_type=filter_type,
                                search_query=search_query,
                                user_filter=user_filter,
+                               category_filter=category_filter,
                                title=title,
                                summary=summary,
                                current_date=now.date())
@@ -729,13 +806,30 @@ def register_routes(app):
         filter_type = request.args.get('filter', 'overall')
         search_query = request.args.get('search', '')
         user_filter = request.args.get('user_filter', 'all')
+        category_filter = request.args.get('category_filter', 'all')
         history_type = request.args.get('type', 'all')
+        start_date_str = request.args.get('start_date', '')
+        end_date_str = request.args.get('end_date', '')
         
         # Calculate date ranges (same as history route)
         now = datetime.now()
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         week_start = now - timedelta(days=7)
         month_start = now - timedelta(days=30)
+        
+        # Parse custom date range if provided
+        custom_start_date = None
+        custom_end_date = None
+        if start_date_str:
+            try:
+                custom_start_date = datetime.strptime(start_date_str, '%Y-%m-%d').replace(hour=0, minute=0, second=0, microsecond=0)
+            except ValueError:
+                pass
+        if end_date_str:
+            try:
+                custom_end_date = datetime.strptime(end_date_str, '%Y-%m-%d').replace(hour=23, minute=59, second=59, microsecond=999999)
+            except ValueError:
+                pass
         
         # Base queries
         applications_query = Application.query
@@ -746,7 +840,33 @@ def register_routes(app):
         influencers_query = Influencer.query
         
         # Apply date filters (same logic as history route)
-        if filter_type == 'today':
+        # First check if custom date range is provided
+        if custom_start_date or custom_end_date:
+            applications = applications_query
+            campaigns = campaigns_query
+            transactions = transactions_query
+            payments = payments_query
+            sponsors = sponsors_query
+            influencers = influencers_query
+            
+            if custom_start_date:
+                applications = applications.filter(Application.created_at >= custom_start_date)
+                campaigns = campaigns.filter(Campaign.created_at >= custom_start_date)
+                transactions = transactions.filter(WalletTransaction.created_at >= custom_start_date)
+                payments = payments.filter(Payment.payment_date >= custom_start_date)
+                sponsors = sponsors.filter(Sponsor.date_joined >= custom_start_date.date())
+                influencers = influencers.filter(Influencer.date_joined >= custom_start_date.date())
+            
+            if custom_end_date:
+                applications = applications.filter(Application.created_at <= custom_end_date)
+                campaigns = campaigns.filter(Campaign.created_at <= custom_end_date)
+                transactions = transactions.filter(WalletTransaction.created_at <= custom_end_date)
+                payments = payments.filter(Payment.payment_date <= custom_end_date)
+                sponsors = sponsors.filter(Sponsor.date_joined <= custom_end_date.date())
+                influencers = influencers.filter(Influencer.date_joined <= custom_end_date.date())
+            
+            period_suffix = "custom_range"
+        elif filter_type == 'today':
             applications = applications_query.filter(Application.created_at >= today_start)
             campaigns = campaigns_query.filter(Campaign.created_at >= today_start)
             transactions = transactions_query.filter(WalletTransaction.created_at >= today_start)
@@ -817,13 +937,28 @@ def register_routes(app):
             campaigns = campaigns.filter(False)
             transactions = transactions.filter(WalletTransaction.user_type == 'influencer')
         
-        # Execute queries
-        applications = applications.order_by(Application.created_at.desc()).all()
-        campaigns = campaigns.order_by(Campaign.created_at.desc()).all()
-        transactions = transactions.order_by(WalletTransaction.created_at.desc()).all()
-        payments = payments.order_by(Payment.payment_date.desc()).all()
-        sponsors = sponsors.order_by(Sponsor.date_joined.desc()).all()
-        influencers = influencers.order_by(Influencer.date_joined.desc()).all()
+        # Apply category filter - only fetch data for selected category
+        if category_filter == 'applications':
+            campaigns, transactions, payments, sponsors, influencers = [], [], [], [], []
+            applications = applications.order_by(Application.created_at.desc()).all()
+        elif category_filter == 'campaigns':
+            applications, transactions, payments, sponsors, influencers = [], [], [], [], []
+            campaigns = campaigns.order_by(Campaign.created_at.desc()).all()
+        elif category_filter == 'transactions':
+            applications, campaigns, payments, sponsors, influencers = [], [], [], [], []
+            transactions = transactions.order_by(WalletTransaction.created_at.desc()).all()
+        elif category_filter == 'users':
+            applications, campaigns, transactions, payments = [], [], [], []
+            sponsors = sponsors.order_by(Sponsor.date_joined.desc()).all()
+            influencers = influencers.order_by(Influencer.date_joined.desc()).all()
+        else:  # category_filter == 'all'
+            # Execute queries and order results
+            applications = applications.order_by(Application.created_at.desc()).all()
+            campaigns = campaigns.order_by(Campaign.created_at.desc()).all()
+            transactions = transactions.order_by(WalletTransaction.created_at.desc()).all()
+            payments = payments.order_by(Payment.payment_date.desc()).all()
+            sponsors = sponsors.order_by(Sponsor.date_joined.desc()).all()
+            influencers = influencers.order_by(Influencer.date_joined.desc()).all()
         
         # Apply history type filter
         if history_type == 'applications':
@@ -1777,7 +1912,8 @@ def register_routes(app):
         
         # Check if sponsor has sufficient balance
         if sponsor.wallet_balance < campaign_budget:
-            flash(f'Insufficient wallet balance. You need ₹{campaign_budget:.2f} to accept this application. Please recharge your wallet.', 'error')
+            deficit = campaign_budget - sponsor.wallet_balance
+            flash(f'Insufficient wallet balance! You have ₹{sponsor.wallet_balance:.2f} but need ₹{campaign_budget:.2f}. Please add ₹{deficit:.2f} to your wallet.', 'error')
             return redirect(url_for('spon_dash'))
 
         try:
