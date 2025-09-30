@@ -56,19 +56,6 @@
 - **Transaction Logging**: Complete audit trails with reference tracking
 - **Balance Management**: Real-time balance updates with notification system
 
-```python
-# Automated Payment Flow
-@app.route('/accept_application/<int:app_id>')
-def accept_application(app_id):
-    # Validate sponsor balance
-    if sponsor.wallet_balance >= campaign.budget:
-        # Process payment
-        sponsor.wallet_balance -= campaign.budget
-        influencer.wallet_balance += campaign.budget
-        # Create transaction records
-        create_wallet_transaction(sponsor, influencer, campaign.budget)
-        return jsonify({'success': True, 'message': 'Payment processed'})
-```
 
 ## 🛠️ Technology Stack
 
